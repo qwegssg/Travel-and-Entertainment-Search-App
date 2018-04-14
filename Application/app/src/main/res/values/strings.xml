@@ -3,9 +3,14 @@
     <string name="keywordLabel">Keyword</string>
     <string name="categoryLabel">Category</string>
     <string name="distanceLabel">Distance (in miles)</string>
+    <string name="locationLabel">From</string>
     <string name="currentLocBtn">Current location</string>
     <string name="otherLocBtn">Other. Specify Location</string>
-    <string name="locationLabel">From</string>
     <string name="searchBtn">SEARCH</string>
     <string name="clearBtn">CLEAR</string>
+    <string name="validationToast">Please fix all fields with errors</string>
+    <string name="inputValidation">Please enter mandatory field</string>
+    <string name="keywordHint">Enter keyword</string>
+    <string name="distanceHint">Enter distance (default 10 miles)</string>
+    <string name="otherLocHint">Type in the Location</string>
 </resources>

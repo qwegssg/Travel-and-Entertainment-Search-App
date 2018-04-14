@@ -33,6 +33,16 @@
             tools:layout_editor_absoluteY="28dp"
             android:layout_marginStart="8dp" />
 
+        <TextView
+            android:id="@+id/keywordValidation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:text="@string/inputValidation"
+            android:textColor="@color/colorValidation"
+            android:visibility="gone" />
+
         <EditText
             android:id="@+id/keywordInput"
             android:layout_width="match_parent"
@@ -42,7 +52,7 @@
             android:layout_marginRight="8dp"
             android:layout_marginStart="8dp"
             android:ems="10"
-            android:hint="Enter keyword"
+            android:hint="@string/keywordHint"
             android:inputType="text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -89,7 +99,7 @@
             android:layout_marginRight="8dp"
             android:layout_marginStart="8dp"
             android:ems="10"
-            android:hint="Enter distance (default 10 miles)"
+            android:hint="@string/distanceHint"
             android:inputType="number"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -128,6 +138,17 @@
                 android:layout_weight="1"
                 android:text="@string/otherLocBtn" />
 
+            <TextView
+                android:id="@+id/otherLocValidation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="@string/inputValidation"
+                android:textColor="@color/colorValidation"
+                android:visibility="gone" />
+
             <AutoCompleteTextView
                 android:id="@+id/otherLocInput"
                 android:layout_width="match_parent"
@@ -135,8 +156,8 @@
                 android:layout_marginLeft="35dp"
                 android:layout_marginStart="35dp"
                 android:layout_weight="1"
-                android:hint="Type in the Location"
-                android:inputType="text|textAutoComplete" />
+                android:hint="@string/otherLocHint"
+                android:inputType="none|text|textAutoComplete" />
 
         </RadioGroup>
 
