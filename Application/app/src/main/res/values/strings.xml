@@ -13,4 +13,7 @@
     <string name="keywordHint">Enter keyword</string>
     <string name="distanceHint">Enter distance (default 10 miles)</string>
     <string name="otherLocHint">Type in the Location</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
