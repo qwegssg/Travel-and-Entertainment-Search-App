@@ -3,6 +3,7 @@ package com.android.yutaoren.placesearchapp;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -19,6 +20,10 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 
 /**
@@ -38,6 +43,8 @@ public class searchTab extends Fragment {
 
     private final int REQUEST_PERMISSION_ACCESS_FINE_LOCATION = 1;
 
+    private FusedLocationProviderClient mFusedLocationClient;
+
     private EditText keywordInput, otherLocInput, distanceInput;
     private TextView keywordValidation;
     private TextView otherLocVlidation;
@@ -46,6 +53,7 @@ public class searchTab extends Fragment {
 
     String keyword, otherLocation;
     int distance;
+    double lat, lng;
 
 
     // TODO: Rename and change types of parameters
@@ -91,6 +99,24 @@ public class searchTab extends Fragment {
 
         View searchView = inflater.inflate(R.layout.fragment_search_tab, container, false);
 
+        //    create google Fused Location Provider Client instance
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        if (ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            mFusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            // Got last known location. In some rare situations this can be null.
+                            if (location != null) {
+                                lat = location.getLatitude();
+                                lng = location.getLongitude();
+                                Toast.makeText(getActivity(), lat + " " + lng, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
+
 //        request the permission from the user.
         if (ContextCompat.checkSelfPermission(getContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION)
@@ -102,6 +128,8 @@ public class searchTab extends Fragment {
 //        else {
 //            Toast.makeText(getActivity(), "Permission (already) Granted!", Toast.LENGTH_SHORT).show();
 //        }
+
+
 
         initSearchWidgets(searchView);
 
@@ -247,13 +275,26 @@ public class searchTab extends Fragment {
         switch (requestCode) {
             case REQUEST_PERMISSION_ACCESS_FINE_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    Toast.makeText(getActivity(), "Permission Granted!", Toast.LENGTH_SHORT).show();
+                    if (ContextCompat.checkSelfPermission(getActivity(),
+                            Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
 
+                        mFusedLocationClient.getLastLocation()
+                            .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
+                                @Override
+                                public void onSuccess(Location location) {
+                                    // Got last known location. In some rare situations this can be null.
+                                    if (location != null) {
+
+                                        lat = location.getLatitude();
+                                        lng = location.getLongitude();
+
+                                    }
+                                }
+                            });
+                    }
                 } else {
-
                     Toast.makeText(getActivity(), "Permission Denied!", Toast.LENGTH_SHORT).show();
                 }
                 return;
