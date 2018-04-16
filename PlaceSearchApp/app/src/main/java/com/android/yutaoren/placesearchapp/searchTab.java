@@ -2,10 +2,12 @@ package com.android.yutaoren.placesearchapp;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -33,6 +35,8 @@ public class searchTab extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+
+    private final int REQUEST_PERMISSION_ACCESS_FINE_LOCATION = 1;
 
     private EditText keywordInput, otherLocInput, distanceInput;
     private TextView keywordValidation;
@@ -87,10 +91,17 @@ public class searchTab extends Fragment {
 
         View searchView = inflater.inflate(R.layout.fragment_search_tab, container, false);
 
-        //        request the permission from the user.
-        ActivityCompat.requestPermissions(getActivity(),
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                0);
+//        request the permission from the user.
+        if (ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_PERMISSION_ACCESS_FINE_LOCATION);
+        }
+//        else {
+//            Toast.makeText(getActivity(), "Permission (already) Granted!", Toast.LENGTH_SHORT).show();
+//        }
 
         initSearchWidgets(searchView);
 
@@ -192,6 +203,7 @@ public class searchTab extends Fragment {
         otherLocVlidation = (TextView) v.findViewById(R.id.otherLocValidation);
 
         currentLocBtn = (RadioButton) v.findViewById(R.id.currentLocBtn);
+        currentLocBtn.setChecked(true);
         otherLocBtn = (RadioButton) v.findViewById(R.id.otherLocBtn);
 
         searchBtn = (Button) v.findViewById(R.id.searchBtn);
@@ -224,6 +236,30 @@ public class searchTab extends Fragment {
 //            Toast.makeText(getActivity(), keyword, Toast.LENGTH_LONG).show();
 //            Toast.makeText(getActivity(), String.valueOf(distance), Toast.LENGTH_LONG).show();
         }
+    }
+
+//    check if the permission is granted or not
+//    if granted, fetch the user's current location
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+
+        switch (requestCode) {
+            case REQUEST_PERMISSION_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    Toast.makeText(getActivity(), "Permission Granted!", Toast.LENGTH_SHORT).show();
+
+                } else {
+
+                    Toast.makeText(getActivity(), "Permission Denied!", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+        }
+
     }
 
 
