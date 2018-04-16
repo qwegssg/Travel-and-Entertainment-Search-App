@@ -1,12 +1,22 @@
 package com.android.yutaoren.searchapp;
 
+import android.Manifest;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 
 /**
@@ -22,6 +32,17 @@ public class SearchTab extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+
+
+    private EditText keywordInput, otherLocInput, distanceInput;
+    private TextView keywordValidation;
+    private TextView otherLocVlidation;
+    private Button searchBtn, clearBtn;
+    private RadioButton currentLocBtn, otherLocBtn;
+
+    String keyword, otherLocation;
+    int distance;
+
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -63,8 +84,78 @@ public class SearchTab extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_search_tab, container, false);
+
+        View searchView = inflater.inflate(R.layout.fragment_search_tab, container, false);
+
+        //        request the permission from the user.
+        ActivityCompat.requestPermissions(getActivity(),
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                0);
+
+        initSearchWidgets(searchView);
+
+        searchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchPlaces();
+            }
+        });
+
+//        if otherLocBtn is checked, enable the other location input field
+        otherLocBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
+                    otherLocInput.setEnabled(true);
+                } else {
+                    otherLocInput.setEnabled(false);
+                }
+            }
+        });
+//        if currentLocBtn is checked, hide the validation of other location input field
+        currentLocBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
+                    otherLocVlidation.setVisibility(View.GONE);
+                }
+            }
+        });
+//        when input has changed, hide the validation
+        keywordInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                keywordValidation.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                keywordValidation.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                keywordValidation.setVisibility(View.GONE);
+            }
+        });
+        otherLocInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                otherLocVlidation.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                otherLocVlidation.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                otherLocVlidation.setVisibility(View.GONE);
+            }
+        });
+
+        return searchView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -90,6 +181,52 @@ public class SearchTab extends Fragment {
         super.onDetach();
         mListener = null;
     }
+
+    private void initSearchWidgets(View v) {
+        keywordInput = (EditText) v.findViewById(R.id.keywordInput);
+        distanceInput = (EditText) v.findViewById(R.id.distanceInput);
+        otherLocInput = (EditText) v.findViewById(R.id.otherLocInput);
+        otherLocInput.setEnabled(false);
+
+        keywordValidation = (TextView) v.findViewById(R.id.keywordValidation);
+        otherLocVlidation = (TextView) v.findViewById(R.id.otherLocValidation);
+
+        currentLocBtn = (RadioButton) v.findViewById(R.id.currentLocBtn);
+        otherLocBtn = (RadioButton) v.findViewById(R.id.otherLocBtn);
+
+        searchBtn = (Button) v.findViewById(R.id.searchBtn);
+        clearBtn = (Button) v.findViewById(R.id.clearBtn);
+    }
+
+    private void searchPlaces() {
+        boolean isValid = true;
+
+//        Trim removes first and last space of a string entered by a user.
+//        if the keyword input is empty:
+        if(keywordInput.getText().toString().trim().isEmpty()) {
+            keywordValidation.setVisibility(View.VISIBLE);
+            Toast.makeText(getActivity(), R.string.validationToast, Toast.LENGTH_LONG).show();
+            isValid = false;
+        }
+//        if otherLocBtn is checked and the other location input is empty:
+        if(otherLocBtn.isChecked()) {
+            if(otherLocInput.getText().toString().trim().isEmpty()) {
+                otherLocVlidation.setVisibility(View.VISIBLE);
+                Toast.makeText(getActivity(), R.string.validationToast, Toast.LENGTH_LONG).show();
+                isValid = false;
+            }
+        }
+
+        if(isValid) {
+            keyword = keywordInput.getText().toString();
+            distance = Integer.valueOf(distanceInput.getText().toString());
+
+//            Toast.makeText(getActivity(), keyword, Toast.LENGTH_LONG).show();
+//            Toast.makeText(getActivity(), String.valueOf(distance), Toast.LENGTH_LONG).show();
+        }
+    }
+
+
 
     /**
      * This interface must be implemented by activities that contain this

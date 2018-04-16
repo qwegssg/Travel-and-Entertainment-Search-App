@@ -18,12 +18,12 @@ public class SearchPagerAdapter extends FragmentStatePagerAdapter {
         switch(position) {
 
             case 0:
-                FavoritesTab favoritesTab = new FavoritesTab();
-                return favoritesTab;
-
-            case 1:
                 SearchTab searchTab = new SearchTab();
                 return searchTab;
+
+            case 1:
+                FavoritesTab favoritesTab = new FavoritesTab();
+                return favoritesTab;
 
             default:
                 return null;
