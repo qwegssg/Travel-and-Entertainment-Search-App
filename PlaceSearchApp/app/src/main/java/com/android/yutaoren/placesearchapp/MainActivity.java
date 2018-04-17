@@ -5,6 +5,11 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity  implements searchTab.OnFragmentInteractionListener,favoritesTab.OnFragmentInteractionListener{
 
@@ -14,6 +19,13 @@ public class MainActivity extends AppCompatActivity  implements searchTab.OnFrag
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        initWidgets();
+
+
+    }
+
+    private void initWidgets() {
 
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
 
@@ -37,10 +49,14 @@ public class MainActivity extends AppCompatActivity  implements searchTab.OnFrag
             public void onTabSelected(TabLayout.Tab tab) {
                 searchPager.setCurrentItem(tab.getPosition());
             }
+
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
         });
     }
 

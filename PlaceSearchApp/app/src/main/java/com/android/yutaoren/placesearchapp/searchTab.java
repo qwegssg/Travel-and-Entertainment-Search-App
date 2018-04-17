@@ -1,6 +1,7 @@
 package com.android.yutaoren.placesearchapp;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -21,9 +22,18 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 /**
@@ -43,7 +53,11 @@ public class searchTab extends Fragment {
 
     private final int REQUEST_PERMISSION_ACCESS_FINE_LOCATION = 1;
 
+//    google play service location client
     private FusedLocationProviderClient mFusedLocationClient;
+
+//    volley request queue
+    private RequestQueue requestQueue;
 
     private EditText keywordInput, otherLocInput, distanceInput;
     private TextView keywordValidation;
@@ -51,9 +65,14 @@ public class searchTab extends Fragment {
     private Button searchBtn, clearBtn;
     private RadioButton currentLocBtn, otherLocBtn;
 
-    String keyword, otherLocation;
+    String keyword, otherLocation, category;
     int distance;
     double lat, lng;
+
+
+
+    private EditText editText2;
+
 
 
     // TODO: Rename and change types of parameters
@@ -101,8 +120,9 @@ public class searchTab extends Fragment {
 
         //    create google Fused Location Provider Client instance
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+
         if (ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mFusedLocationClient.getLastLocation()
                     .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
                         @Override
@@ -132,6 +152,9 @@ public class searchTab extends Fragment {
 
 
         initSearchWidgets(searchView);
+
+//        init request queue
+        requestQueue = Volley.newRequestQueue(getActivity());
 
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -236,6 +259,14 @@ public class searchTab extends Fragment {
 
         searchBtn = (Button) v.findViewById(R.id.searchBtn);
         clearBtn = (Button) v.findViewById(R.id.clearBtn);
+
+
+
+//    created to test output
+        editText2 = (EditText) v.findViewById(R.id.editText2);
+
+
+
     }
 
     private void searchPlaces() {
@@ -258,13 +289,67 @@ public class searchTab extends Fragment {
         }
 
         if(isValid) {
+//            1. keyword input
             keyword = keywordInput.getText().toString();
-            distance = Integer.valueOf(distanceInput.getText().toString());
+//            2. distance input (handle the case that user uses the default distance value)
+            if(distanceInput.getText().length() == 0) {
+                distance = 10;
+            } else {
+                distance = Integer.valueOf(distanceInput.getText().toString());
+            }
 
-//            Toast.makeText(getActivity(), keyword, Toast.LENGTH_LONG).show();
-//            Toast.makeText(getActivity(), String.valueOf(distance), Toast.LENGTH_LONG).show();
+
+//            3. category input
+//            need to be implement!
+            category = "default";
+
+
+//            4. location input
+            if(otherLocInput.getText().length() == 0) {
+                otherLocation = "undefined";
+            } else {
+                otherLocation = otherLocInput.getText().toString();
+            }
+
+            String url = "http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/search?keyword="
+                        + keyword + "&category=" + category + "&distance=" + distance
+                        + "&geoLocation=" + lat + "," + lng + "&otherLocation=" + otherLocation;
+
+
+            sendJSONRequest(url);
         }
     }
+
+    public void sendJSONRequest(String url) {
+////        show progressing dialog
+//        ProgressDialog progressDialog = new ProgressDialog(getActivity());
+//        progressDialog.setMessage("Fetching results");
+//        progressDialog.show();
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    editText2.setText(response.getJSONObject("data").getString("next_page_token"));
+//                    editText2.setText(response.getString("status"));
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {}
+        });
+        requestQueue.add(jsonObjectRequest);
+        editText2.setText(url);
+    }
+
+
+
 
 //    check if the permission is granted or not
 //    if granted, fetch the user's current location

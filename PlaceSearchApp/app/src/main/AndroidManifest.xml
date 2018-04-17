@@ -4,6 +4,8 @@
 
     <!--define the ACCESS_FINE_LOCATION permission-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!--allow the app to connect the internet-->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
