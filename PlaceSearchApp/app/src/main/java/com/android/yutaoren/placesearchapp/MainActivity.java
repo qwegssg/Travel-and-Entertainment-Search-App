@@ -21,6 +21,8 @@ public class MainActivity extends AppCompatActivity  implements searchTab.OnFrag
         setContentView(R.layout.activity_main);
 
         initWidgets();
+
+
     }
 
     private void initWidgets() {

@@ -1,16 +1,12 @@
 package com.android.yutaoren.placesearchapp;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -35,14 +31,9 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.gson.Gson;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.Serializable;
-import java.util.LinkedHashMap;
 
 
 /**
@@ -61,8 +52,6 @@ public class searchTab extends Fragment {
 
 
     private final int REQUEST_PERMISSION_ACCESS_FINE_LOCATION = 1;
-
-
 
 //    google play service location client
     private FusedLocationProviderClient mFusedLocationClient;
@@ -332,25 +321,20 @@ public class searchTab extends Fragment {
     }
 
     public void sendJSONRequest(String url) {
-
-        editText2.setText(url);
-
-//        show the progressing dialog
-        final ShowProgressDialog showProgressDialog = new ShowProgressDialog(getActivity());
-        showProgressDialog.onPreExecute();
+////        show progressing dialog
+//        ProgressDialog progressDialog = new ProgressDialog(getActivity());
+//        progressDialog.setMessage("Fetching results");
+//        progressDialog.show();
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
+
             @Override
             public void onResponse(JSONObject response) {
                 try {
+                    editText2.setText(response.getJSONObject("data").getString("next_page_token"));
+//                    editText2.setText(response.getString("status"));
 
-                    if(response.getString("status").equals("OK")) {
-//                        editText2.setText(response.getJSONArray("results").toString());
-                        showPlacesList(response);
-                    }
-//                    dismiss the progressing dialog
-                    showProgressDialog.onPostExecute();
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -361,7 +345,10 @@ public class searchTab extends Fragment {
             public void onErrorResponse(VolleyError error) {}
         });
         requestQueue.add(jsonObjectRequest);
+        editText2.setText(url);
     }
+
+
 
 
 //    check if the permission is granted or not
@@ -393,44 +380,10 @@ public class searchTab extends Fragment {
                 } else {
                     Toast.makeText(getActivity(), "Permission Denied!", Toast.LENGTH_SHORT).show();
                 }
+                return;
             }
         }
 
-    }
-
-    private static class ShowProgressDialog extends AsyncTask<Void, Void, Void> {
-        private ProgressDialog dialog;
-
-        private ShowProgressDialog(Activity activity) {
-            dialog = new ProgressDialog(activity);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            dialog.setMessage("Fetching results");
-            dialog.show();
-        }
-
-        protected Void doInBackground(Void... args) {
-            // do background work here
-            return null;
-        }
-
-        protected void onPostExecute() {
-            // do UI work here
-            if (dialog.isShowing()) {
-                dialog.dismiss();
-            }
-        }
-    }
-
-    private void showPlacesList(JSONObject response) {
-        Intent intent = new Intent(getActivity(), PlacesListActivity.class);
-
-        String resString = response.toString();
-        intent.putExtra("ShowMeTheList", resString);
-
-        startActivity(intent);
     }
 
 
