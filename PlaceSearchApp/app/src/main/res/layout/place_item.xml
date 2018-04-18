@@ -15,7 +15,7 @@
             android:padding="8dp">
 
             <ImageView
-                android:id="@+id/placeCategory"
+                android:id="@+id/imageView"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:padding="10dp" />
@@ -25,7 +25,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="2dp"
-                android:layout_toRightOf="@id/placeCategory"
+                android:layout_toRightOf="@id/imageView"
                 android:text="12233455"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                 android:textColor="#000000" />
@@ -35,7 +35,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/placeTitle"
-                android:layout_toRightOf="@id/placeCategory"
+                android:layout_toRightOf="@id/imageView"
                 android:layout_marginLeft="5dp"
                 android:layout_marginTop="5dp"
                 android:text="12345678"

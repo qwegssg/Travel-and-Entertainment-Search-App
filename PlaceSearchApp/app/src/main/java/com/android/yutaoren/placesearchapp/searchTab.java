@@ -371,8 +371,10 @@ public class searchTab extends Fragment {
                                 public void onSuccess(Location location) {
                                     // Got last known location. In some rare situations this can be null.
                                     if (location != null) {
+
                                         lat = location.getLatitude();
                                         lng = location.getLongitude();
+
                                     }
                                 }
                             });

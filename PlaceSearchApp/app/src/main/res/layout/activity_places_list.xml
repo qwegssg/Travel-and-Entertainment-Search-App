@@ -6,15 +6,15 @@
     android:layout_height="match_parent"
     tools:context=".PlacesListActivity">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/placesRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"></android.support.v7.widget.RecyclerView>
+    <!--<android.support.v7.widget.RecyclerView-->
+        <!--android:id="@+id/placesList"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"></android.support.v7.widget.RecyclerView>-->
 
 
-    <!--<TextView-->
-        <!--android:id="@+id/textView3"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="TextView" />-->
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
 </RelativeLayout>
