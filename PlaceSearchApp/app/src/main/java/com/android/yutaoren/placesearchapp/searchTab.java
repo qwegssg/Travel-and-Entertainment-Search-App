@@ -10,11 +10,13 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +35,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONException;
@@ -135,7 +138,19 @@ public class searchTab extends Fragment {
                                 lat = location.getLatitude();
                                 lng = location.getLongitude();
                                 Toast.makeText(getActivity(), lat + " " + lng, Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getActivity(), "cannot get current loc", Toast.LENGTH_SHORT).show();
+//                                hardcode lat & lng
+                                lat = 34.0266;
+                                lng = -118.2832;
                             }
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d("MapDemoActivity", "Error trying to get last GPS location");
+                            e.printStackTrace();
                         }
                     });
         }
@@ -350,7 +365,7 @@ public class searchTab extends Fragment {
             public void onErrorResponse(VolleyError error) {}
         });
         requestQueue.add(jsonObjectRequest);
-//        editText2.setText(url);
+        editText2.setText(url);
     }
 
 
@@ -416,14 +431,12 @@ public class searchTab extends Fragment {
         }
     }
 
-
     private void initPlacesList(JSONObject response) {
         Intent intent = new Intent(getActivity(), PlacesListActivity.class);
 
         String resString = response.toString();
         intent.putExtra("ShowMeTheList", resString);
         startActivity(intent);
-
     }
 
 
