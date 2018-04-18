@@ -1,11 +1,14 @@
 package com.android.yutaoren.placesearchapp;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -321,10 +324,9 @@ public class searchTab extends Fragment {
     }
 
     public void sendJSONRequest(String url) {
-////        show progressing dialog
-//        ProgressDialog progressDialog = new ProgressDialog(getActivity());
-//        progressDialog.setMessage("Fetching results");
-//        progressDialog.show();
+//        show the progressing dialog
+        final ShowProgressDialog showProgressDialog = new ShowProgressDialog(getActivity());
+        showProgressDialog.onPreExecute();
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -332,9 +334,12 @@ public class searchTab extends Fragment {
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    editText2.setText(response.getJSONObject("data").getString("next_page_token"));
-//                    editText2.setText(response.getString("status"));
 
+                    if(response.getString("status").equals("OK")) {
+                        initPlacesList(response);
+                    }
+//                    dismiss the progressing dialog
+                    showProgressDialog.onPostExecute();
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -345,10 +350,8 @@ public class searchTab extends Fragment {
             public void onErrorResponse(VolleyError error) {}
         });
         requestQueue.add(jsonObjectRequest);
-        editText2.setText(url);
+//        editText2.setText(url);
     }
-
-
 
 
 //    check if the permission is granted or not
@@ -382,9 +385,44 @@ public class searchTab extends Fragment {
                 } else {
                     Toast.makeText(getActivity(), "Permission Denied!", Toast.LENGTH_SHORT).show();
                 }
-                return;
             }
         }
+    }
+
+
+    private static class ShowProgressDialog extends AsyncTask<Void, Void, Void> {
+        private ProgressDialog dialog;
+
+        private ShowProgressDialog(Activity activity) {
+            dialog = new ProgressDialog(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.setMessage("Fetching results");
+            dialog.show();
+        }
+
+        protected Void doInBackground(Void... args) {
+            // do background work here
+            return null;
+        }
+
+        protected void onPostExecute() {
+            // do UI work here
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }
+    }
+
+
+    private void initPlacesList(JSONObject response) {
+        Intent intent = new Intent(getActivity(), PlacesListActivity.class);
+
+        String resString = response.toString();
+        intent.putExtra("ShowMeTheList", resString);
+        startActivity(intent);
 
     }
 
