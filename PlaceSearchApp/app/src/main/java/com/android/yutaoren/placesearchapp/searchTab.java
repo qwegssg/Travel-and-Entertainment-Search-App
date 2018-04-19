@@ -20,10 +20,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +43,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.security.Provider;
 
 
 /**
@@ -61,7 +66,6 @@ public class searchTab extends Fragment {
 
 //    google play service location client
     private FusedLocationProviderClient mFusedLocationClient;
-
 //    volley request queue
     private RequestQueue requestQueue;
 
@@ -70,10 +74,12 @@ public class searchTab extends Fragment {
     private TextView otherLocVlidation;
     private Button searchBtn, clearBtn;
     private RadioButton currentLocBtn, otherLocBtn;
+    private Spinner categoryInput;
+    private ArrayAdapter<CharSequence> categoryAdapter;
 
-    String keyword, otherLocation, category;
-    int distance;
-    double lat, lng;
+    private String keyword, otherLocation, category, selectedCategory;
+    private int distance;
+    private double lat, lng;
 
 
 
@@ -124,7 +130,9 @@ public class searchTab extends Fragment {
 
         View searchView = inflater.inflate(R.layout.fragment_search_tab, container, false);
 
-        //    create google Fused Location Provider Client instance
+        initSearchWidgets(searchView);
+
+//        create google Fused Location Provider Client instance
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
         if (ContextCompat.checkSelfPermission(getActivity(),
@@ -163,22 +171,17 @@ public class searchTab extends Fragment {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     REQUEST_PERMISSION_ACCESS_FINE_LOCATION);
         }
-//        else {
-//            Toast.makeText(getActivity(), "Permission (already) Granted!", Toast.LENGTH_SHORT).show();
-//        }
 
-
-
-        initSearchWidgets(searchView);
-
-//        init request queue
-        requestQueue = Volley.newRequestQueue(getActivity());
-
-        searchBtn.setOnClickListener(new View.OnClickListener() {
+//        handle the spinner selection
+        categoryInput.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onClick(View v) {
-                searchPlaces();
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                selectedCategory = getResources().getStringArray(R.array.categoryValue)[position];
+
             }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
 //        if otherLocBtn is checked, enable the other location input field
@@ -235,6 +238,13 @@ public class searchTab extends Fragment {
             }
         });
 
+        searchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchPlaces();
+            }
+        });
+
         return searchView;
     }
 
@@ -278,6 +288,11 @@ public class searchTab extends Fragment {
         searchBtn = (Button) v.findViewById(R.id.searchBtn);
         clearBtn = (Button) v.findViewById(R.id.clearBtn);
 
+        categoryInput = (Spinner) v.findViewById(R.id.categoryInput);
+        categoryAdapter = ArrayAdapter.createFromResource(getContext(), R.array.categoryName, android.R.layout.simple_spinner_item);
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categoryInput.setAdapter(categoryAdapter);
+
 
 
 //    created to test output
@@ -289,6 +304,8 @@ public class searchTab extends Fragment {
 
     private void searchPlaces() {
         boolean isValid = true;
+//        init request queue
+        requestQueue = Volley.newRequestQueue(getActivity());
 
 //        Trim removes first and last space of a string entered by a user.
 //        if the keyword input is empty:
@@ -315,13 +332,11 @@ public class searchTab extends Fragment {
             } else {
                 distance = Integer.valueOf(distanceInput.getText().toString());
             }
-
-
 //            3. category input
-//            need to be implement!
             category = "default";
-
-
+            if(!selectedCategory.equals("default")) {
+                category = selectedCategory;
+            }
 //            4. location input
             if(otherLocInput.getText().length() == 0) {
                 otherLocation = "undefined";
@@ -332,8 +347,7 @@ public class searchTab extends Fragment {
             String url = "http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/search?keyword="
                         + keyword + "&category=" + category + "&distance=" + distance
                         + "&geoLocation=" + lat + "," + lng + "&otherLocation=" + otherLocation;
-
-
+            
             sendJSONRequest(url);
         }
     }
@@ -365,7 +379,7 @@ public class searchTab extends Fragment {
             public void onErrorResponse(VolleyError error) {}
         });
         requestQueue.add(jsonObjectRequest);
-        editText2.setText(url);
+        editText2.setText(category);
     }
 
 
