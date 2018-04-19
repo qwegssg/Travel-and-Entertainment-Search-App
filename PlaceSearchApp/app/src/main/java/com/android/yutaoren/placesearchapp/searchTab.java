@@ -347,7 +347,7 @@ public class searchTab extends Fragment {
             String url = "http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/search?keyword="
                         + keyword + "&category=" + category + "&distance=" + distance
                         + "&geoLocation=" + lat + "," + lng + "&otherLocation=" + otherLocation;
-            
+
             sendJSONRequest(url);
         }
     }

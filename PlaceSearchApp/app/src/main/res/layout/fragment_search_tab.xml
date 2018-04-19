@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:padding="15dp"
     tools:context=".searchTab">
 
 
@@ -11,17 +12,14 @@
         android:id="@+id/keywordLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:text="@string/keywordLabel"
         tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="28dp"
-        android:layout_marginStart="8dp" />
+        tools:layout_editor_absoluteY="28dp" />
 
     <TextView
         android:id="@+id/keywordValidation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:text="@string/inputValidation"
         android:textColor="@color/colorValidation"
         android:visibility="gone" />
@@ -30,10 +28,6 @@
         android:id="@+id/keywordInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
         android:ems="10"
         android:hint="@string/keywordHint"
         android:inputType="text"
@@ -43,38 +37,28 @@
         android:id="@+id/categoryLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:text="@string/categoryLabel"
         tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="140dp"
-        android:layout_marginStart="8dp" />
+        tools:layout_editor_absoluteY="140dp" />
 
     <Spinner
         android:id="@+id/categoryInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
         tools:layout_editor_absoluteY="168dp" />
 
     <TextView
         android:id="@+id/distanceLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/distanceLabel"
-        android:layout_marginStart="8dp" />
+        android:layout_marginTop="5dp"
+        android:text="@string/distanceLabel" />
 
     <EditText
         android:id="@+id/distanceInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
         android:ems="10"
         android:hint="@string/distanceHint"
         android:inputType="number" />
@@ -83,21 +67,18 @@
         android:id="@+id/locationLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:text="@string/locationLabel" />
 
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginStart="8dp">
+        android:orientation="vertical">
 
         <RadioButton
             android:id="@+id/currentLocBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="@string/currentLocBtn" />
 
@@ -105,7 +86,6 @@
             android:id="@+id/otherLocBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="@string/otherLocBtn" />
 
@@ -113,7 +93,6 @@
             android:id="@+id/otherLocValidation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="@string/inputValidation"
             android:textColor="@color/colorValidation"
@@ -123,7 +102,7 @@
             android:id="@+id/otherLocInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="35dp"
+            android:layout_marginStart="28dp"
             android:layout_weight="1"
             android:hint="@string/otherLocHint"
             android:inputType="none|text|textAutoComplete" />
@@ -133,15 +112,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
         android:layout_weight="1">
 
         <Button
             android:id="@+id/searchBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="@string/searchBtn" />
 
@@ -149,7 +125,6 @@
             android:id="@+id/clearBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:text="@string/clearBtn" />
 

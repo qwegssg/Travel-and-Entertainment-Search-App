@@ -1,12 +1,25 @@
 package com.android.yutaoren.placesearchapp;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,8 +32,14 @@ public class PlacesListActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
+    private Button nextBtn, previousBtn;
+    private RequestQueue requestQueue;
 
-    private List<PlaceItem> placeItems;
+    private int currentPage;
+    private int totalPage;
+    private String next_page_token;
+//    a list storing every page's list
+    private List<List<PlaceItem>> placeItemsStorage;
 
 
     @Override
@@ -28,22 +47,172 @@ public class PlacesListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_places_list);
 
+//        enable back button functionality
         getSupportActionBar().setHomeButtonEnabled(true);
 //        enable back button functionality in older (before API 14)as well as newer APIs
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 //        init place list Widgets
-        placeItems = new ArrayList<>();
-        recyclerView = (RecyclerView) findViewById(R.id.placesRecyclerView);
+        initPlacesWidgets();
 
         try {
-
-//            TextView textView3 = (TextView) findViewById(R.id.textView3);
-//            textView3.setText(jsonObject.getJSONArray("results").toString());
-
             JSONObject jsonObject = new JSONObject(getIntent().getExtras().getString("ShowMeTheList"));
-            JSONArray jsonArray = jsonObject.getJSONArray("results");
 
+            initPlacesList(jsonObject);
+//
+////            next page check
+//            if(jsonObject.has("next_page_token")) {
+//                next_page_token = jsonObject.getString("next_page_token");
+//                nextPageCheck(next_page_token);
+//            }
+//
+////            init the place list items
+//            JSONArray jsonArray = jsonObject.getJSONArray("results");
+//            for(int i = 0; i < jsonArray.length(); i++) {
+//                JSONObject placeObj = jsonArray.getJSONObject(i);
+//                PlaceItem place = new PlaceItem(
+//                        placeObj.getString("name"),
+//                        placeObj.getString("vicinity"),
+//                        placeObj.getString("icon")
+//                );
+//                placeItems.add(place);
+//            }
+//
+//            adapter  = new PlacesListAdapter(placeItems, this);
+////            set the fixed view size
+//            recyclerView.setHasFixedSize(true);
+//            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+//            recyclerView.setAdapter(adapter);
+
+        } catch(JSONException e){
+            e.printStackTrace();
+        }
+
+        previousBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+//                show the places list
+                adapter  = new PlacesListAdapter(placeItemsStorage.get(currentPage - 2), getApplicationContext());
+//                set the fixed view size
+                recyclerView.setHasFixedSize(true);
+                recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                recyclerView.setAdapter(adapter);
+
+                currentPage--;
+                pageBtnCheck();
+            }
+        });
+
+        nextBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                if next page's list hes aleady been fetched
+                if(placeItemsStorage.size() > currentPage + 1 || placeItemsStorage.size() == currentPage + 1) {
+//                    show the places list
+                    adapter  = new PlacesListAdapter(placeItemsStorage.get(currentPage), getApplicationContext());
+//                    set the fixed view size
+                    recyclerView.setHasFixedSize(true);
+                    recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                    recyclerView.setAdapter(adapter);
+
+                    currentPage++;
+                    pageBtnCheck();
+                } else {
+                    String nextPageUrl = "http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/next?next_page_token=" + next_page_token;
+                    sendJSONRequest(nextPageUrl);
+                }
+            }
+        });
+
+    }
+
+    private void initPlacesWidgets() {
+        recyclerView = (RecyclerView) findViewById(R.id.placesRecyclerView);
+
+        previousBtn = (Button) findViewById(R.id.previousBtn);
+        nextBtn = (Button) findViewById(R.id.nextBtn);
+        previousBtn.setEnabled(false);
+        nextBtn.setEnabled(false);
+
+        currentPage = 0;
+        totalPage = 0;
+        placeItemsStorage = new ArrayList<>();
+    }
+
+    private void pageBtnCheck() {
+        Toast.makeText(getApplicationContext(), currentPage+ " ", Toast.LENGTH_LONG).show();
+        if(currentPage == 2 || currentPage == 3) {
+            previousBtn.setEnabled(true);
+        } else {
+            previousBtn.setEnabled(false);
+        }
+//        the total page is calculated means the last page is already reached
+        if(totalPage != 0) {
+            if(currentPage < totalPage) {
+                nextBtn.setEnabled(true);
+            } else {
+                nextBtn.setEnabled(false);
+            }
+        }
+//        the last page has not been reached yet, so the next btn can always be true
+        else {
+            nextBtn.setEnabled(true);
+        }
+
+    }
+
+    private void sendJSONRequest(String url) {
+//        show the progressing dialog
+        final ShowProgressDialog showProgressDialog = new ShowProgressDialog(this);
+        showProgressDialog.onPreExecute();
+
+        requestQueue = Volley.newRequestQueue(this);
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if(response.getString("status").equals("OK")) {
+                                initPlacesList(response);
+                            }
+//                    dismiss the progressing dialog
+                            showProgressDialog.onPostExecute();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {}
+        });
+        requestQueue.add(jsonObjectRequest);
+    }
+
+
+
+
+    private void initPlacesList(JSONObject jsonObject) {
+
+        List<PlaceItem> placeItems = new ArrayList<>();
+
+        currentPage++;
+        pageBtnCheck();
+
+        try {
+//            next page check
+            if(jsonObject.has("next_page_token")) {
+                next_page_token = jsonObject.getString("next_page_token");
+            } else {
+//                currentPage is the last page
+                totalPage = currentPage;
+                nextBtn.setEnabled(false);
+            }
+
+//            init the place list items
+            JSONArray jsonArray = jsonObject.getJSONArray("results");
             for(int i = 0; i < jsonArray.length(); i++) {
                 JSONObject placeObj = jsonArray.getJSONObject(i);
                 PlaceItem place = new PlaceItem(
@@ -51,21 +220,49 @@ public class PlacesListActivity extends AppCompatActivity {
                         placeObj.getString("vicinity"),
                         placeObj.getString("icon")
                 );
-
                 placeItems.add(place);
             }
-
-            adapter  = new PlacesListAdapter(placeItems, this);
-//            set the fixed view size
-            recyclerView.setHasFixedSize(true);
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            recyclerView.setAdapter(adapter);
-
         } catch(JSONException e){
             e.printStackTrace();
         }
 
+        placeItemsStorage.add(placeItems);
+
+//        show the places list
+        adapter  = new PlacesListAdapter(placeItems, this);
+//        set the fixed view size
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
     }
+
+
+    private static class ShowProgressDialog extends AsyncTask<Void, Void, Void> {
+        private ProgressDialog dialog;
+
+        private ShowProgressDialog(Activity activity) {
+            dialog = new ProgressDialog(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.setMessage("Fetching results");
+            dialog.show();
+        }
+
+        protected Void doInBackground(Void... args) {
+            // do background work here
+            return null;
+        }
+
+        protected void onPostExecute() {
+            // do UI work here
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }
+    }
+
 
 //    android.R.id.home handling code
     @Override
