@@ -5,6 +5,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,20 +22,24 @@ public class MainActivity extends AppCompatActivity  implements searchTab.OnFrag
         setContentView(R.layout.activity_main);
 
         initWidgets();
-
-
     }
 
     private void initWidgets() {
 
+//        remove the shadow below the tool bar
+        getSupportActionBar().setElevation(0);
+
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
 
-//        for (int i = 0; i < tabLayout.getTabCount(); i++ ) {
-//            TextView tabContent = (TextView) (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+
+//            TextView tabContent = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_search_tab, null);
 //            tabContent.setText("SEARCH");
 //            tabContent.setCompoundDrawablesWithIntrinsicBounds(R.drawable.search_icon, 0, 0, 0);
-//            tabLayout.getTabAt(i).setCustomView(tabContent);
-//        }
+//            tabLayout.getTabAt(0).setCustomView(tabContent);
+//            tabContent.setText("FAVORITES");
+//            tabContent.setCompoundDrawablesWithIntrinsicBounds(R.drawable.heart_fill_white, 0, 0, 0);
+//            tabLayout.getTabAt(1).setCustomView(tabContent);
+
 
         tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.search_icon).setText("SEARCH"));
         tabLayout.addTab(tabLayout.newTab().setText("FAVORITES").setIcon(R.drawable.heart_fill_white));
