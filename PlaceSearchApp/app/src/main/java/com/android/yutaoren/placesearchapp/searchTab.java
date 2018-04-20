@@ -245,6 +245,23 @@ public class searchTab extends Fragment {
             }
         });
 
+        clearBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                keywordValidation.setVisibility(View.GONE);
+                otherLocVlidation.setVisibility(View.GONE);
+                otherLocBtn.setChecked(false);
+                otherLocInput.setEnabled(false);
+                currentLocBtn.setChecked(true);
+                categoryAdapter = ArrayAdapter.createFromResource(getContext(), R.array.categoryName, android.R.layout.simple_spinner_item);
+                categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                categoryInput.setAdapter(categoryAdapter);
+                keywordInput.setText("");
+                distanceInput.setText("");
+                otherLocInput.setText("");
+            }
+        });
+
         return searchView;
     }
 
