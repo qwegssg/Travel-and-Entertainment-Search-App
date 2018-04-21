@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,7 +28,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 public class PlacesListActivity extends AppCompatActivity {
 
@@ -93,7 +98,7 @@ public class PlacesListActivity extends AppCompatActivity {
             public void onClick(View v) {
 
 //                show the places list
-                adapter  = new PlacesListAdapter(placeItemsStorage.get(currentPage - 2), getApplicationContext());
+                adapter  = new PlacesListAdapter(placeItemsStorage.get(currentPage - 2),PlacesListActivity.this);
 //                set the fixed view size
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -110,7 +115,7 @@ public class PlacesListActivity extends AppCompatActivity {
 //                if next page's list hes aleady been fetched
                 if(placeItemsStorage.size() > currentPage + 1 || placeItemsStorage.size() == currentPage + 1) {
 //                    show the places list
-                    adapter  = new PlacesListAdapter(placeItemsStorage.get(currentPage), getApplicationContext());
+                    adapter  = new PlacesListAdapter(placeItemsStorage.get(currentPage), PlacesListActivity.this);
 //                    set the fixed view size
                     recyclerView.setHasFixedSize(true);
                     recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -192,8 +197,6 @@ public class PlacesListActivity extends AppCompatActivity {
     }
 
 
-
-
     private void initPlacesList(JSONObject jsonObject) {
 
         List<PlaceItem> placeItems = new ArrayList<>();
@@ -218,7 +221,8 @@ public class PlacesListActivity extends AppCompatActivity {
                 PlaceItem place = new PlaceItem(
                         placeObj.getString("name"),
                         placeObj.getString("vicinity"),
-                        placeObj.getString("icon")
+                        placeObj.getString("icon"),
+                        placeObj.getString("id")
                 );
                 placeItems.add(place);
             }
@@ -282,5 +286,12 @@ public class PlacesListActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
+
+//    fetch the place details info
+    public void onClickCalled(String place_id) {
+        Toast.makeText(getApplicationContext(), place_id, Toast.LENGTH_LONG ).show();
+    }
+
+
 
 }

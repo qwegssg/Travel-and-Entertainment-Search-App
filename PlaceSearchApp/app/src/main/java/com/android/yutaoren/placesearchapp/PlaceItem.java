@@ -5,11 +5,13 @@ public class PlaceItem {
     private String placeTitle;
     private String placeAddress;
     private String imageUrl;
+    private String place_id;
 
-    public PlaceItem(String placeTitle, String placeAddress, String imageUrl) {
+    public PlaceItem(String placeTitle, String placeAddress, String imageUrl, String place_id) {
         this.placeTitle = placeTitle;
         this.placeAddress = placeAddress;
         this.imageUrl = imageUrl;
+        this.place_id = place_id;
 
     }
 
@@ -27,5 +29,9 @@ public class PlaceItem {
 
         return imageUrl;
 
+    }
+
+    public String getPlace_id() {
+        return place_id;
     }
 }

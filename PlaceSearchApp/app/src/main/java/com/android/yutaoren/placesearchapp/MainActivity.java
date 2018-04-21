@@ -41,8 +41,8 @@ public class MainActivity extends AppCompatActivity  implements searchTab.OnFrag
 //            tabLayout.getTabAt(1).setCustomView(tabContent);
 
 
-        tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.search_icon).setText("SEARCH"));
-        tabLayout.addTab(tabLayout.newTab().setText("FAVORITES").setIcon(R.drawable.heart_fill_white));
+        tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.search_icon).setText(" SEARCH"));
+        tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.heart_fill_white).setText(" FAVORITES"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager searchPager = (ViewPager) findViewById(R.id.searchPager);

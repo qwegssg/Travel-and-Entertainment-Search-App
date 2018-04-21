@@ -14,6 +14,8 @@
         android:id="@+id/tabLayout"
         android:background="@color/colorToolBar"
         android:minHeight="?attr/actionBarSize"
+        app:tabTextColor="@color/colorTabText"
+        app:tabSelectedTextColor="@color/colorTabText"
         >
 
     </android.support.design.widget.TabLayout>

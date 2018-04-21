@@ -15,7 +15,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.ViewHoder> {
+public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.ViewHolder> {
 
     private List<PlaceItem> placeItems;
     private Context context;
@@ -27,16 +27,16 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
 
     @NonNull
     @Override
-    public ViewHoder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.place_item, parent, false);
-        return new ViewHoder(view);
+        return new ViewHolder(view);
     }
 
 //    bind the view with data
     @Override
-    public void onBindViewHolder(@NonNull ViewHoder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         final PlaceItem placeItem = placeItems.get(position);
 
         holder.textViewTitle.setText(placeItem.getPlaceTitle());
@@ -49,7 +49,8 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
         holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "You clicked " + placeItem.getPlaceTitle(), Toast.LENGTH_LONG ).show();
+//                Toast.makeText(context, "You clicked " + placeItem.getPlaceTitle(), Toast.LENGTH_LONG ).show();
+                ((PlacesListActivity)context).onClickCalled(placeItem.getPlace_id());
             }
         });
     }
@@ -60,7 +61,7 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
         return placeItems.size();
     }
 
-    public class ViewHoder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         //        define view objects
         private TextView textViewTitle;
@@ -69,7 +70,7 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
         private RelativeLayout relativeLayout;
 
 
-        public ViewHoder(View itemView) {
+        public ViewHolder(View itemView) {
             super(itemView);
 
             textViewTitle = (TextView) itemView.findViewById(R.id.placeTitle);
