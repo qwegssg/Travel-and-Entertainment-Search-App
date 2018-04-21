@@ -9,12 +9,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity  implements searchTab.OnFragmentInteractionListener,favoritesTab.OnFragmentInteractionListener{
+import java.util.ArrayList;
+import java.util.List;
 
-    private TabLayout tabLayout;
+public class MainActivity extends AppCompatActivity  implements searchTab.OnFragmentInteractionListener,favoritesTab.OnFragmentInteractionListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,25 +31,29 @@ public class MainActivity extends AppCompatActivity  implements searchTab.OnFrag
 //        remove the shadow below the tool bar
         getSupportActionBar().setElevation(0);
 
-        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-
-
-//            TextView tabContent = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_search_tab, null);
-//            tabContent.setText("SEARCH");
-//            tabContent.setCompoundDrawablesWithIntrinsicBounds(R.drawable.search_icon, 0, 0, 0);
-//            tabLayout.getTabAt(0).setCustomView(tabContent);
-//            tabContent.setText("FAVORITES");
-//            tabContent.setCompoundDrawablesWithIntrinsicBounds(R.drawable.heart_fill_white, 0, 0, 0);
-//            tabLayout.getTabAt(1).setCustomView(tabContent);
-
-
-        tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.search_icon).setText(" SEARCH"));
-        tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.heart_fill_white).setText(" FAVORITES"));
-        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        List<Integer> tabIcons = new ArrayList<>();
+        tabIcons.add(R.drawable.search_icon);
+        tabIcons.add(R.drawable.heart_fill_white);
 
         final ViewPager searchPager = (ViewPager) findViewById(R.id.searchPager);
         final SearchPagerAdapter searchPagerAdpter = new SearchPagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
         searchPager.setAdapter(searchPagerAdpter);
+
+        for (int i = 0; i < tabLayout.getTabCount(); i++ ) {
+            LinearLayout tabLinearLayout = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.custom_search_tab, null);
+            TextView tabContent = (TextView) tabLinearLayout.findViewById(R.id.tabContent);
+            tabContent.setText(getResources().getStringArray(R.array.searchTabContent)[i]);
+            tabContent.setTextColor(getResources().getColor(R.color.colorSelectedTabText));
+            tabContent.setCompoundDrawablesWithIntrinsicBounds(tabIcons.get(i), 0, 0, 0);
+            tabLayout.getTabAt(i).setCustomView(tabContent);
+        }
+
+//        tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.search_icon).setText(" SEARCH"));
+//        tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.heart_fill_white).setText(" FAVORITES"));
+
+//        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+
         searchPager.setOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override

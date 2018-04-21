@@ -290,6 +290,11 @@ public class PlacesListActivity extends AppCompatActivity {
 //    fetch the place details info
     public void onClickCalled(String place_id) {
         Toast.makeText(getApplicationContext(), place_id, Toast.LENGTH_LONG ).show();
+        Intent intent = new Intent(this, PlaceDetailActivity.class);
+
+        String resString = place_id;
+        intent.putExtra("ShowMeTheDetail", resString);
+        startActivity(intent);
     }
 
 

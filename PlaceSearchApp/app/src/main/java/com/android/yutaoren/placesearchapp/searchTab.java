@@ -396,7 +396,7 @@ public class searchTab extends Fragment {
             public void onErrorResponse(VolleyError error) {}
         });
         requestQueue.add(jsonObjectRequest);
-        editText2.setText(category);
+        editText2.setText(url);
     }
 
 

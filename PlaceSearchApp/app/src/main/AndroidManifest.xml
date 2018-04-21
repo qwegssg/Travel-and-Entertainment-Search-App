@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.yutaoren.placesearchapp">
 
-    <!--define the ACCESS_FINE_LOCATION permission-->
+    <!-- define the ACCESS_FINE_LOCATION permission -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <!--allow the app to connect the internet-->
+    <!-- allow the app to connect the internet -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -14,7 +14,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,9 +24,15 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".PlacesListActivity"
-            android:label="Search results">
-        </activity>
+        <activity
+            android:name=".PlacesListActivity"
+            android:label="Search results"
+            android:launchMode="singleTop"/>
+
+        <activity
+            android:name=".PlaceDetailActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".PlacesListActivity"/>
     </application>
 
 </manifest>
