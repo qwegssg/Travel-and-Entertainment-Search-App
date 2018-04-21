@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,7 @@ public class PlaceDetailActivity extends AppCompatActivity
         getSupportActionBar().setHomeButtonEnabled(true);
 //        enable back button functionality in older (before API 14)as well as newer APIs
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setTitle(getIntent().getExtras().getString("showMeTheName"));
 
 
 
@@ -68,13 +70,14 @@ public class PlaceDetailActivity extends AppCompatActivity
             tabContent.setText(getResources().getStringArray(R.array.detailTabContent)[i]);
             tabContent.setTextColor(getResources().getColor(R.color.colorSelectedTabText));
             tabContent.setGravity(Gravity.CENTER);
-            tabContent.setPadding(30, 0, 30,0);
+            tabContent.setPadding(40, 0, 40,0);
             tabContent.setCompoundDrawablesWithIntrinsicBounds(tabIcons.get(i), 0, 0, 0);
             tabLayout.getTabAt(i).setCustomView(tabContent);
         }
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+
     }
 
 

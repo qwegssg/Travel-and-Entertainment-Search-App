@@ -50,7 +50,7 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
             @Override
             public void onClick(View v) {
 //                Toast.makeText(context, "You clicked " + placeItem.getPlaceTitle(), Toast.LENGTH_LONG ).show();
-                ((PlacesListActivity)context).onClickCalled(placeItem.getPlace_id());
+                ((PlacesListActivity)context).onClickCalled(placeItem.getPlace_id(), placeItem.getPlaceTitle());
             }
         });
     }

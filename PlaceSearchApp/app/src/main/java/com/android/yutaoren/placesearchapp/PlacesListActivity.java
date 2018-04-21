@@ -288,12 +288,16 @@ public class PlacesListActivity extends AppCompatActivity {
     }
 
 //    fetch the place details info
-    public void onClickCalled(String place_id) {
-        Toast.makeText(getApplicationContext(), place_id, Toast.LENGTH_LONG ).show();
-        Intent intent = new Intent(this, PlaceDetailActivity.class);
+    public void onClickCalled(String place_id, String placeTitle) {
+//        Toast.makeText(getApplicationContext(), place_id, Toast.LENGTH_LONG ).show();
+//        Toast.makeText(getApplicationContext(), placeTitle, Toast.LENGTH_LONG ).show();
 
-        String resString = place_id;
-        intent.putExtra("ShowMeTheDetail", resString);
+        String detailUrl ="http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/detail?placeid=" + place_id;
+
+
+        Intent intent = new Intent(this, PlaceDetailActivity.class);
+        intent.putExtra("ShowMeTheDetail", place_id);
+        intent.putExtra("showMeTheName", placeTitle);
         startActivity(intent);
     }
 
