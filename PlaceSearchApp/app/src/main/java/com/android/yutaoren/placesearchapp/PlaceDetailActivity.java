@@ -10,6 +10,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.ActionMenuItemView;
 import android.support.v7.widget.Toolbar;
 
 import android.support.v4.app.Fragment;
@@ -24,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -47,6 +49,8 @@ public class PlaceDetailActivity extends AppCompatActivity
                     photosTab.OnFragmentInteractionListener,
                     mapTab.OnFragmentInteractionListener,
                     reviewsTab.OnFragmentInteractionListener {
+
+    JSONObject detailResult;
 
     String placeAddress;
     String placePhoneNumber;
@@ -102,9 +106,7 @@ public class PlaceDetailActivity extends AppCompatActivity
 //        get the detail from place list activity
         try {
             JSONObject jsonObject = new JSONObject(getIntent().getExtras().getString("ShowMeTheDetail"));
-            JSONObject detailResult = new JSONObject(jsonObject.getString("result"));
-
-            Toast.makeText(getApplicationContext(), detailResult.getString("name"), Toast.LENGTH_LONG ).show();
+            detailResult = new JSONObject(jsonObject.getString("result"));
 
             toolbar.setTitle(detailResult.getString("name"));
 
@@ -117,7 +119,6 @@ public class PlaceDetailActivity extends AppCompatActivity
             placeRating = detailResult.getDouble("rating");
             placeGooglePage = detailResult.getString("url");
             placeWebsite = detailResult.getString("website");
-
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -161,12 +162,57 @@ public class PlaceDetailActivity extends AppCompatActivity
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
+        int id = item.getItemId();
+
+        if (id == R.id.twitterbtn) {
+            try {
+
+                String twitterUrl = "https://twitter.com/intent/tweet?text=Check out "
+                                    + detailResult.getString("name") + " located at "
+                                    + detailResult.getString("formatted_address") + ". Website:&url="
+                                    + detailResult.getString("website") + "&hashtags=TravelAndEntertainmentSearch";
+                Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(twitterUrl));
+                startActivity(intent);
+                return true;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (id == R.id.favoriteBtn) {
+            if(item.getTitle().equals("like it")) {
+                item.setIcon(R.drawable.heart_fill_white);
+                try {
+                    Toast.makeText(this, detailResult.getString("name")
+                            + " was added to favorites", Toast.LENGTH_LONG).show();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                item.setTitle("unlike it");
+
+//                add place to the fav list:
+
+
+
+
+            } else {
+                item.setIcon(R.drawable.heart_outline_white);
+                try {
+                    Toast.makeText(this, detailResult.getString("name")
+                            + " was removed from favorites", Toast.LENGTH_LONG).show();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                item.setTitle("like it");
+                
+//                remove place to the fav list:
+
+
+
+
+            }
+        }
 
         return super.onOptionsItemSelected(item);
     }

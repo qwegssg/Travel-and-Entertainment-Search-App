@@ -9,4 +9,17 @@
         <!--android:orderInCategory="100"-->
         <!--android:title="@string/action_settings"-->
         <!--app:showAsAction="never" />-->
+
+    <item
+        android:id="@+id/twitterbtn"
+        android:icon="@drawable/share"
+        android:title="share"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/favoriteBtn"
+        android:icon="@drawable/heart_outline_white"
+        android:title="like it"
+        app:showAsAction="always" />
+
 </menu>
