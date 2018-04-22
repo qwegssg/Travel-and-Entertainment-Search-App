@@ -222,7 +222,8 @@ public class PlacesListActivity extends AppCompatActivity {
                         placeObj.getString("name"),
                         placeObj.getString("vicinity"),
                         placeObj.getString("icon"),
-                        placeObj.getString("id")
+//                        it is "place_id", not "id"!!!!
+                        placeObj.getString("place_id")
                 );
                 placeItems.add(place);
             }
@@ -250,7 +251,7 @@ public class PlacesListActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            dialog.setMessage("Fetching results");
+            dialog.setMessage("Fetching next page");
             dialog.show();
         }
 
@@ -289,18 +290,51 @@ public class PlacesListActivity extends AppCompatActivity {
 
 //    fetch the place details info
     public void onClickCalled(String place_id, String placeTitle) {
-//        Toast.makeText(getApplicationContext(), place_id, Toast.LENGTH_LONG ).show();
-//        Toast.makeText(getApplicationContext(), placeTitle, Toast.LENGTH_LONG ).show();
+        String theUrl = "http://TravelSearchAndroid-env.adcw8xtpzj.us-east-2.elasticbeanstalk.com/detail?placeid=" + place_id;
+        sendJSONRequestforDetail(theUrl);
+//
+//        Intent intent = new Intent(this, PlaceDetailActivity.class);
+//        intent.putExtra("ShowMeTheId", place_id);
+//        intent.putExtra("showMeTheName", placeTitle);
+//        startActivity(intent);
+    }
 
-        String detailUrl ="http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/detail?placeid=" + place_id;
+    private void sendJSONRequestforDetail(String theUrl) {
+//        show the progressing dialog
+        final ShowProgressDialog showProgressDialog = new ShowProgressDialog(this);
+        showProgressDialog.onPreExecute();
 
+        requestQueue = Volley.newRequestQueue(this);
 
-        Intent intent = new Intent(this, PlaceDetailActivity.class);
-        intent.putExtra("ShowMeTheDetail", place_id);
-        intent.putExtra("showMeTheName", placeTitle);
-        startActivity(intent);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, theUrl, null,
+                new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if(response.getString("status").equals("OK")) {
+//                                Toast.makeText(getApplicationContext(), "qweqwfgsgdhgdhs", Toast.LENGTH_LONG ).show();
+                                initPlacesDetail(response);
+                            }
+//                    dismiss the progressing dialog
+                            showProgressDialog.onPostExecute();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {}
+        });
+        requestQueue.add(jsonObjectRequest);
     }
 
 
+    private void initPlacesDetail(JSONObject response) {
+        Intent intent = new Intent(this, PlaceDetailActivity.class);
 
+        String resString = response.toString();
+        intent.putExtra("ShowMeTheDetail", resString);
+        startActivity(intent);
+    }
 }

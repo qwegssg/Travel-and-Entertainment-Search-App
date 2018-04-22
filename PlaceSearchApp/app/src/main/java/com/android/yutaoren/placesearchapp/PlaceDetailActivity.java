@@ -1,10 +1,14 @@
 package com.android.yutaoren.placesearchapp;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -20,9 +24,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +47,9 @@ public class PlaceDetailActivity extends AppCompatActivity
                     photosTab.OnFragmentInteractionListener,
                     mapTab.OnFragmentInteractionListener,
                     reviewsTab.OnFragmentInteractionListener {
+
+    String placeAddress;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,41 +63,54 @@ public class PlaceDetailActivity extends AppCompatActivity
         getSupportActionBar().setHomeButtonEnabled(true);
 //        enable back button functionality in older (before API 14)as well as newer APIs
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setTitle(getIntent().getExtras().getString("showMeTheName"));
+
+        createView();
+
+        try {
+            JSONObject jsonObject = new JSONObject(getIntent().getExtras().getString("ShowMeTheDetail"));
+            JSONObject detailResult = new JSONObject(jsonObject.getString("result"));
+
+            Toast.makeText(getApplicationContext(), detailResult.getString("name"), Toast.LENGTH_LONG ).show();
+
+            toolbar.setTitle(detailResult.getString("name"));
 
 
+//            Bundle bundle = new Bundle();
+//            bundle.putString("address", detailResult.getString("formatted_address"));
+//            bundle.putString("placeAddress", "From Activity");
 
-        SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-//        host the section contents
-        ViewPager mViewPager = (ViewPager) findViewById(R.id.detailViewPager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+            placeAddress = detailResult.getString("formatted_address");
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
 
-        List<Integer> tabIcons = new ArrayList<>();
-        tabIcons.add(R.drawable.info);
-        tabIcons.add(R.drawable.photos);
-        tabIcons.add(R.drawable.maps);
-        tabIcons.add(R.drawable.review);
+//            FragmentManager fragmentManager = getSupportFragmentManager();
+//            FragmentTransaction fragmentTransaction =fragmentManager.beginTransaction();
 
-        for (int i = 0; i < tabLayout.getTabCount(); i++ ) {
-            LinearLayout tabLinearLayout = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.custom_detail_tab, null);
-            TextView tabContent = (TextView) tabLinearLayout.findViewById(R.id.detailTabContent);
-//            TextView tabContent = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_detail_tab, null);
-            tabContent.setText(getResources().getStringArray(R.array.detailTabContent)[i]);
-            tabContent.setTextColor(getResources().getColor(R.color.colorSelectedTabText));
-            tabContent.setGravity(Gravity.CENTER);
-            tabContent.setPadding(40, 0, 40,0);
-            tabContent.setCompoundDrawablesWithIntrinsicBounds(tabIcons.get(i), 0, 0, 0);
-            tabLayout.getTabAt(i).setCustomView(tabContent);
+//            fragmentTransaction.add(R.id.detailViewPager, infoTab);
+//            fragmentTransaction.commit();
+
+//            infoTab.setArguments(bundle);
+//            mSectionsPagerAdapter.getItem(0);
+//            infoTab = new infoTab();
+//            infoTab.putArguments(bundle);
+
+//            int id = infoTab.getView().getId();
+//            FragmentManager fm = getSupportFragmentManager();
+//            fm.beginTransaction().replace(id, infoTab).commit();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-
-        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+//
+//
+//        EditText textView4 = (EditText) findViewById(R.id.qwe);
+//        textView4.setText(detailUrl);
 
     }
 
+
+    public String getPlaceAddress() {
+        return placeAddress;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -140,6 +171,38 @@ public class PlaceDetailActivity extends AppCompatActivity
             return 4;
         }
     }
+
+    private void createView() {
+        SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+//        host the section contents
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.detailViewPager);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
+
+        List<Integer> tabIcons = new ArrayList<>();
+        tabIcons.add(R.drawable.info);
+        tabIcons.add(R.drawable.photos);
+        tabIcons.add(R.drawable.maps);
+        tabIcons.add(R.drawable.review);
+
+        for (int i = 0; i < tabLayout.getTabCount(); i++ ) {
+            LinearLayout tabLinearLayout = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.custom_detail_tab, null);
+            TextView tabContent = (TextView) tabLinearLayout.findViewById(R.id.detailTabContent);
+//            TextView tabContent = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_detail_tab, null);
+            tabContent.setText(getResources().getStringArray(R.array.detailTabContent)[i]);
+            tabContent.setTextColor(getResources().getColor(R.color.colorSelectedTabText));
+            tabContent.setGravity(Gravity.CENTER);
+            tabContent.setPadding(40, 0, 40,0);
+            tabContent.setCompoundDrawablesWithIntrinsicBounds(tabIcons.get(i), 0, 0, 0);
+            tabLayout.getTabAt(i).setCustomView(tabContent);
+        }
+
+        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+    }
+
 
     @Override
     public void onFragmentInteraction(Uri uri) {

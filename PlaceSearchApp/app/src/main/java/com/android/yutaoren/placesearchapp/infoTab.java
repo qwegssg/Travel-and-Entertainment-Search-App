@@ -4,9 +4,12 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 
 /**
@@ -28,6 +31,11 @@ public class infoTab extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+
+    TextView placeAddress;
+
+
 
     public infoTab() {
         // Required empty public constructor
@@ -63,9 +71,36 @@ public class infoTab extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        View view = inflater.inflate(R.layout.fragment_info_tab, container, false);
+
+        PlaceDetailActivity activity = (PlaceDetailActivity) getActivity();
+        String place_address = activity.getPlaceAddress();
+//
+
+        placeAddress = (TextView) view.findViewById(R.id.placeAddress);
+        placeAddress.setText(place_address);
+
+//        if(getArguments() != null) {
+//            Toast.makeText(getContext(), "keyid ", Toast.LENGTH_LONG).show();
+//        } else {
+//            Toast.makeText(getContext(), "No Way!!!! ", Toast.LENGTH_LONG).show();
+//        }
+//        String address = getArguments().getString("place_address");
+//        placeAddress.setText(address);
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_info_tab, container, false);
+        return view;
     }
+
+
+
+    public void putArguments(Bundle args) {
+    String place_address = args.getString("placeAddress");
+//        placeAddress.setText("place_address");
+}
+
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

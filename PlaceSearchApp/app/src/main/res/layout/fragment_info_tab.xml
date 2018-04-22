@@ -1,14 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/info_container"
+
+
+    android:stretchColumns="1"
+
+
+
     tools:context=".infoTab">
 
-    <!-- TODO: Update blank fragment layout -->
+<TableRow>
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="hello from info" />
+        android:text="Address"
+        android:layout_gravity="left"
+        android:textStyle="bold"/>
+    <TextView
+        android:id="@+id/placeAddress"
+        android:text="placeAddress"
+        android:layout_gravity="center"/>
+</TableRow>
 
-</FrameLayout>
+<TableRow>
+    <TextView
+        android:text="Phone Number"
+        android:layout_gravity="left"
+        android:textStyle="bold"/>
+    <TextView
+        android:id="@+id/placePhoneNumber"
+        android:text="placePhoneNumber"
+        android:layout_gravity="center"/>
+</TableRow>
+
+
+</TableLayout>
