@@ -49,7 +49,11 @@ public class PlaceDetailActivity extends AppCompatActivity
                     reviewsTab.OnFragmentInteractionListener {
 
     String placeAddress;
-
+    String placePhoneNumber;
+    String placePriceLevel;
+    double placeRating;
+    String placeGooglePage;
+    String placeWebsite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +68,38 @@ public class PlaceDetailActivity extends AppCompatActivity
 //        enable back button functionality in older (before API 14)as well as newer APIs
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        createView();
+//        set view content and tabLayout
+        SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+//        host the section contents
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.detailViewPager);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
 
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
+
+        List<Integer> tabIcons = new ArrayList<>();
+        tabIcons.add(R.drawable.info);
+        tabIcons.add(R.drawable.photos);
+        tabIcons.add(R.drawable.maps);
+        tabIcons.add(R.drawable.review);
+
+        for (int i = 0; i < tabLayout.getTabCount(); i++ ) {
+            LinearLayout tabLinearLayout = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.custom_detail_tab, null);
+            TextView tabContent = (TextView) tabLinearLayout.findViewById(R.id.detailTabContent);
+//            TextView tabContent = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_detail_tab, null);
+            tabContent.setText(getResources().getStringArray(R.array.detailTabContent)[i]);
+            tabContent.setTextColor(getResources().getColor(R.color.colorSelectedTabText));
+            tabContent.setGravity(Gravity.CENTER);
+            tabContent.setPadding(40, 0, 40,0);
+            tabContent.setCompoundDrawablesWithIntrinsicBounds(tabIcons.get(i), 0, 0, 0);
+            tabLayout.getTabAt(i).setCustomView(tabContent);
+        }
+
+        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+
+
+//        get the detail from place list activity
         try {
             JSONObject jsonObject = new JSONObject(getIntent().getExtras().getString("ShowMeTheDetail"));
             JSONObject detailResult = new JSONObject(jsonObject.getString("result"));
@@ -74,42 +108,45 @@ public class PlaceDetailActivity extends AppCompatActivity
 
             toolbar.setTitle(detailResult.getString("name"));
 
-
-//            Bundle bundle = new Bundle();
-//            bundle.putString("address", detailResult.getString("formatted_address"));
-//            bundle.putString("placeAddress", "From Activity");
-
             placeAddress = detailResult.getString("formatted_address");
+            placePhoneNumber = detailResult.getString("formatted_phone_number");
+            placePriceLevel = "";
+            for(int p = 0; p < detailResult.getInt("price_level"); p++) {
+                placePriceLevel += "$";
+            }
+            placeRating = detailResult.getDouble("rating");
+            placeGooglePage = detailResult.getString("url");
+            placeWebsite = detailResult.getString("website");
 
-
-//            FragmentManager fragmentManager = getSupportFragmentManager();
-//            FragmentTransaction fragmentTransaction =fragmentManager.beginTransaction();
-
-//            fragmentTransaction.add(R.id.detailViewPager, infoTab);
-//            fragmentTransaction.commit();
-
-//            infoTab.setArguments(bundle);
-//            mSectionsPagerAdapter.getItem(0);
-//            infoTab = new infoTab();
-//            infoTab.putArguments(bundle);
-
-//            int id = infoTab.getView().getId();
-//            FragmentManager fm = getSupportFragmentManager();
-//            fm.beginTransaction().replace(id, infoTab).commit();
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
-//
-//
-//        EditText textView4 = (EditText) findViewById(R.id.qwe);
-//        textView4.setText(detailUrl);
-
     }
 
 
     public String getPlaceAddress() {
         return placeAddress;
+    }
+
+    public String getPlacePhoneNumber() {
+        return placePhoneNumber;
+    }
+
+    public String getPlacePriceLevel() {
+        return placePriceLevel;
+    }
+
+    public double getPlaceRating() {
+        return placeRating;
+    }
+
+    public String getPlaceGooglePage() {
+        return placeGooglePage;
+    }
+
+    public String getPlaceWebsite() {
+        return placeWebsite;
     }
 
     @Override
@@ -172,36 +209,6 @@ public class PlaceDetailActivity extends AppCompatActivity
         }
     }
 
-    private void createView() {
-        SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-//        host the section contents
-        ViewPager mViewPager = (ViewPager) findViewById(R.id.detailViewPager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
-
-        List<Integer> tabIcons = new ArrayList<>();
-        tabIcons.add(R.drawable.info);
-        tabIcons.add(R.drawable.photos);
-        tabIcons.add(R.drawable.maps);
-        tabIcons.add(R.drawable.review);
-
-        for (int i = 0; i < tabLayout.getTabCount(); i++ ) {
-            LinearLayout tabLinearLayout = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.custom_detail_tab, null);
-            TextView tabContent = (TextView) tabLinearLayout.findViewById(R.id.detailTabContent);
-//            TextView tabContent = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_detail_tab, null);
-            tabContent.setText(getResources().getStringArray(R.array.detailTabContent)[i]);
-            tabContent.setTextColor(getResources().getColor(R.color.colorSelectedTabText));
-            tabContent.setGravity(Gravity.CENTER);
-            tabContent.setPadding(40, 0, 40,0);
-            tabContent.setCompoundDrawablesWithIntrinsicBounds(tabIcons.get(i), 0, 0, 0);
-            tabLayout.getTabAt(i).setCustomView(tabContent);
-        }
-
-        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
-    }
 
 
     @Override

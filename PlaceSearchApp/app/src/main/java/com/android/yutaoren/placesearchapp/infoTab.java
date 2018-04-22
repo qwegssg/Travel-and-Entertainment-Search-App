@@ -8,6 +8,9 @@ import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.RatingBar;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,8 +35,6 @@ public class infoTab extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-
-    TextView placeAddress;
 
 
 
@@ -71,25 +72,42 @@ public class infoTab extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_info_tab, container, false);
 
         PlaceDetailActivity activity = (PlaceDetailActivity) getActivity();
+
         String place_address = activity.getPlaceAddress();
-//
+        String place_phone_number = activity.getPlacePhoneNumber();
+        String place_price_level = activity.getPlacePriceLevel();
+        float place_rating = (float) activity.getPlaceRating();
+        String place_google_page = activity.getPlaceGooglePage();
+        String place_website = activity.getPlaceWebsite();
 
-        placeAddress = (TextView) view.findViewById(R.id.placeAddress);
+        TextView placeAddress = (TextView) view.findViewById(R.id.placeAddress);
+        TextView placePhoneNumber = (TextView) view.findViewById(R.id.placePhoneNumber);
+        TextView placePriceLevel = (TextView) view.findViewById(R.id.placePriceLevel);
+        RatingBar ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
+        TextView placeGooglePage = (TextView) view.findViewById(R.id.placeGooglePage);
+        TextView placeWebsite = (TextView) view.findViewById(R.id.placeWebsite);
+
         placeAddress.setText(place_address);
+        placePhoneNumber.setText(place_phone_number);
+        placePriceLevel.setText(place_price_level);
+//        if the rating is not available
+        if(place_rating == 0.0) {
+//            set the weight of ratingBar to 0 so that it is set hidden
+            TableRow.LayoutParams params = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 0);
+            ratingBar.setLayoutParams(params);
+        }
+        else {
+            ratingBar.setRating(place_rating);
+        }
+        placeGooglePage.setText(place_google_page);
+        placeWebsite.setText(place_website);
 
-//        if(getArguments() != null) {
-//            Toast.makeText(getContext(), "keyid ", Toast.LENGTH_LONG).show();
-//        } else {
-//            Toast.makeText(getContext(), "No Way!!!! ", Toast.LENGTH_LONG).show();
-//        }
-//        String address = getArguments().getString("place_address");
-//        placeAddress.setText(address);
 
-        // Inflate the layout for this fragment
+
         return view;
     }
 

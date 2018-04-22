@@ -146,7 +146,6 @@ public class PlacesListActivity extends AppCompatActivity {
     }
 
     private void pageBtnCheck() {
-        Toast.makeText(getApplicationContext(), currentPage+ " ", Toast.LENGTH_LONG).show();
         if(currentPage == 2 || currentPage == 3) {
             previousBtn.setEnabled(true);
         } else {
@@ -290,13 +289,8 @@ public class PlacesListActivity extends AppCompatActivity {
 
 //    fetch the place details info
     public void onClickCalled(String place_id, String placeTitle) {
-        String theUrl = "http://TravelSearchAndroid-env.adcw8xtpzj.us-east-2.elasticbeanstalk.com/detail?placeid=" + place_id;
+        String theUrl = "http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/detail?placeid=" + place_id;
         sendJSONRequestforDetail(theUrl);
-//
-//        Intent intent = new Intent(this, PlaceDetailActivity.class);
-//        intent.putExtra("ShowMeTheId", place_id);
-//        intent.putExtra("showMeTheName", placeTitle);
-//        startActivity(intent);
     }
 
     private void sendJSONRequestforDetail(String theUrl) {
@@ -313,7 +307,6 @@ public class PlacesListActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         try {
                             if(response.getString("status").equals("OK")) {
-//                                Toast.makeText(getApplicationContext(), "qweqwfgsgdhgdhs", Toast.LENGTH_LONG ).show();
                                 initPlacesDetail(response);
                             }
 //                    dismiss the progressing dialog
