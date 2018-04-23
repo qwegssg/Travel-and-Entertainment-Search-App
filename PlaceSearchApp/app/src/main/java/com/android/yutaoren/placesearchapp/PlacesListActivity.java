@@ -64,30 +64,6 @@ public class PlacesListActivity extends AppCompatActivity {
             JSONObject jsonObject = new JSONObject(getIntent().getExtras().getString("ShowMeTheList"));
 
             initPlacesList(jsonObject);
-//
-////            next page check
-//            if(jsonObject.has("next_page_token")) {
-//                next_page_token = jsonObject.getString("next_page_token");
-//                nextPageCheck(next_page_token);
-//            }
-//
-////            init the place list items
-//            JSONArray jsonArray = jsonObject.getJSONArray("results");
-//            for(int i = 0; i < jsonArray.length(); i++) {
-//                JSONObject placeObj = jsonArray.getJSONObject(i);
-//                PlaceItem place = new PlaceItem(
-//                        placeObj.getString("name"),
-//                        placeObj.getString("vicinity"),
-//                        placeObj.getString("icon")
-//                );
-//                placeItems.add(place);
-//            }
-//
-//            adapter  = new PlacesListAdapter(placeItems, this);
-////            set the fixed view size
-//            recyclerView.setHasFixedSize(true);
-//            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-//            recyclerView.setAdapter(adapter);
 
         } catch(JSONException e){
             e.printStackTrace();

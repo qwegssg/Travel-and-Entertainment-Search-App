@@ -438,12 +438,57 @@ public class searchTab extends Fragment {
             @Override
             public void onResponse(JSONObject response) {
                 try {
+//                    if other location is used
+                    if(response.has("lat") && response.getDouble("lat") < 99999.9){
+                        String geoLocation = response.getDouble("lat") + "," + response.getDouble("lng");
 
-                    if(response.getString("status").equals("OK")) {
-                        initPlacesList(response);
+//                        debug use
+//                        editText2.setText(geoLocation);
+
+                        String url = "http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/search?keyword="
+                                + keyword + "&category=" + category + "&distance=" + distance
+                                + "&geoLocation=" + geoLocation + "&otherLocation=undefined";
+
+                        JsonObjectRequest otherLocRequest = new JsonObjectRequest(Request.Method.GET, url,
+                                null, new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    if(response.getString("status").equals("OK")) {
+                                        initPlacesList(response);
+//                                        dismiss the progressing dialog
+                                        showProgressDialog.onPostExecute();
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {}
+                        });
+                        requestQueue.add(otherLocRequest);
                     }
-//                    dismiss the progressing dialog
-                    showProgressDialog.onPostExecute();
+//                    if current location is used, then response would return OK status
+                    else if(response.getString("status").equals("OK")) {
+
+                        initPlacesList(response);
+//                        dismiss the progressing dialog
+                        showProgressDialog.onPostExecute();
+                    }
+                    else if(response.getString("status").equals("ZERO_RESULTS")) {
+                        Toast.makeText(getActivity(), "ZERO_RESULTS", Toast.LENGTH_LONG).show();
+//                        dismiss the progressing dialog
+                        showProgressDialog.onPostExecute();
+
+//                        show no results code here:
+
+
+
+
+                    }
+
+
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -454,8 +499,11 @@ public class searchTab extends Fragment {
             public void onErrorResponse(VolleyError error) {}
         });
         requestQueue.add(jsonObjectRequest);
+
         editText2.setText(url);
+
     }
+
 
 
 //    check if the permission is granted or not
