@@ -257,11 +257,11 @@ public class PlacesListActivity extends AppCompatActivity {
     }
 
     private void startActivityAfterCleanup(Class<?> cls) {
-//        if (projectsDao != null) projectsDao.close();
         Intent intent = new Intent(getApplicationContext(), cls);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
+
 
 //    fetch the place details info
     public void onClickCalled(String place_id, String placeTitle) {
@@ -297,7 +297,6 @@ public class PlacesListActivity extends AppCompatActivity {
         });
         requestQueue.add(jsonObjectRequest);
     }
-
 
     private void initPlacesDetail(JSONObject response) {
         Intent intent = new Intent(this, PlaceDetailActivity.class);

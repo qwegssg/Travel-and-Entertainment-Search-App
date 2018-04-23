@@ -52,6 +52,7 @@ public class PlaceDetailActivity extends AppCompatActivity
 
     JSONObject detailResult;
 
+
     String placeAddress;
     String placePhoneNumber;
     String placePriceLevel;
@@ -65,7 +66,6 @@ public class PlaceDetailActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_detail);
 
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 //        enable back button functionality
@@ -73,7 +73,45 @@ public class PlaceDetailActivity extends AppCompatActivity
 //        enable back button functionality in older (before API 14)as well as newer APIs
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-//        set view content and tabLayout
+        tabGenerator();
+
+        initPlaceDetailInfo();
+
+//        get the detail from place list activity
+        try {
+            JSONObject jsonObject = new JSONObject(getIntent().getExtras().getString("ShowMeTheDetail"));
+            detailResult = new JSONObject(jsonObject.getString("result"));
+
+            toolbar.setTitle(detailResult.getString("name"));
+            if(detailResult.has("formatted_address")) {
+                placeAddress = detailResult.getString("formatted_address");
+            }
+            if(detailResult.has("formatted_phone_number")) {
+                placePhoneNumber = detailResult.getString("formatted_phone_number");
+            }
+            if(detailResult.has("price_level")) {
+                for(int p = 0; p < detailResult.getInt("price_level"); p++) {
+                    placePriceLevel += "$";
+                }
+            }
+            if(detailResult.has("rating")) {
+                placeRating = detailResult.getDouble("rating");
+            }
+            if(detailResult.has("url")) {
+                placeGooglePage = detailResult.getString("url");
+            }
+            if(detailResult.has("website")) {
+                placeWebsite = detailResult.getString("website");
+            }
+//            in order to retrieve the photos of the place
+            place_id = detailResult.getString("place_id");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void tabGenerator() {
         SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 //        host the section contents
         ViewPager mViewPager = (ViewPager) findViewById(R.id.detailViewPager);
@@ -102,30 +140,16 @@ public class PlaceDetailActivity extends AppCompatActivity
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+    }
 
-
-//        get the detail from place list activity
-        try {
-            JSONObject jsonObject = new JSONObject(getIntent().getExtras().getString("ShowMeTheDetail"));
-            detailResult = new JSONObject(jsonObject.getString("result"));
-
-            toolbar.setTitle(detailResult.getString("name"));
-
-            placeAddress = detailResult.getString("formatted_address");
-            placePhoneNumber = detailResult.getString("formatted_phone_number");
-            placePriceLevel = "";
-            for(int p = 0; p < detailResult.getInt("price_level"); p++) {
-                placePriceLevel += "$";
-            }
-            placeRating = detailResult.getDouble("rating");
-            placeGooglePage = detailResult.getString("url");
-            placeWebsite = detailResult.getString("website");
-//            in order to retrieve the photos of the place
-            place_id = detailResult.getString("place_id");
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    private void initPlaceDetailInfo() {
+        placeAddress = "";
+        placePhoneNumber = "";
+        placePriceLevel = "";
+        placeRating = 0.0;
+        placeGooglePage = "";
+        placeWebsite = "";
+        place_id = "";
     }
 
 
@@ -157,13 +181,13 @@ public class PlaceDetailActivity extends AppCompatActivity
         return place_id;
     }
 
+//    implement the tool bar menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_place_detail, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -173,11 +197,18 @@ public class PlaceDetailActivity extends AppCompatActivity
 
         if (id == R.id.twitterbtn) {
             try {
-
-                String twitterUrl = "https://twitter.com/intent/tweet?text=Check out "
-                                    + detailResult.getString("name") + " located at "
-                                    + detailResult.getString("formatted_address") + ". Website:&url="
-                                    + detailResult.getString("website") + "&hashtags=TravelAndEntertainmentSearch";
+                String twitterUrl = "";
+                if(!placeWebsite.equals("")) {
+                    twitterUrl = "https://twitter.com/intent/tweet?text=Check out "
+                            + detailResult.getString("name") + " located at "
+                            + placeAddress + ". Website:&url="
+                            + placeWebsite + "&hashtags=TravelAndEntertainmentSearch";
+                } else if(!placeGooglePage.equals("")) {
+                    twitterUrl = "https://twitter.com/intent/tweet?text=Check out "
+                            + detailResult.getString("name") + " located at "
+                            + placeAddress + ". Website:&url="
+                            + placeGooglePage + "&hashtags=TravelAndEntertainmentSearch";
+                }
                 Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(twitterUrl));
                 startActivity(intent);

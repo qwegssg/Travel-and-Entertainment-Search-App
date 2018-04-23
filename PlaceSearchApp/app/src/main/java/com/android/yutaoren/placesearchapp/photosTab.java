@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,9 @@ import com.google.android.gms.location.places.PlacePhotoResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -41,6 +46,10 @@ public class photosTab extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter adapter;
+    private List<Bitmap> photoList;
 
 
     public photosTab() {
@@ -80,10 +89,14 @@ public class photosTab extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_photos_tab, container, false);
 
+        recyclerView = (RecyclerView) view.findViewById(R.id.photosRecyclerView);
+        photoList = new ArrayList<>();
 
-
+//        get the place id
         PlaceDetailActivity activity = (PlaceDetailActivity) getActivity();
         getPhotos(view, activity.getPlace_id());
+
+
 
         return view;
     }
@@ -128,7 +141,10 @@ public class photosTab extends Fragment {
                 PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
 
                 for(int i = 0; i < photoMetadataBuffer.getCount(); i++) {
-                    final ImageView photoDetail = (ImageView) theView.findViewById(R.id.placeDetailPhoto);
+//                    final ImageView photoDetail = (ImageView) theView.findViewById(R.id.placeDetailPhoto);
+                    Toast.makeText(getContext(), photoMetadataBuffer.getCount() + "", Toast.LENGTH_LONG).show();
+                    final int photoNum = photoMetadataBuffer.getCount();
+
                     PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(i);
                     Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
                     photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
@@ -138,7 +154,14 @@ public class photosTab extends Fragment {
                             Bitmap bitmap = photo.getBitmap();
 //                        scale the bitmap to fit the screen size
                             int photoWidth = 1275;
-                            photoDetail.setImageBitmap(scaleBitmap(bitmap, photoWidth));
+                            photoList.add(scaleBitmap(bitmap, photoWidth));
+                            if(photoList.size() == photoNum) {
+                                adapter = new photosAdapter(photoList);
+                                recyclerView.setHasFixedSize(true);
+                                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                                recyclerView.setAdapter(adapter);
+                            }
+
                         }
                     });
                 }

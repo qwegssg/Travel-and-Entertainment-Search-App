@@ -112,14 +112,6 @@ public class infoTab extends Fragment {
     }
 
 
-
-    public void putArguments(Bundle args) {
-    String place_address = args.getString("placeAddress");
-//        placeAddress.setText("place_address");
-}
-
-
-
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
