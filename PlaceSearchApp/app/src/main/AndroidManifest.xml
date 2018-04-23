@@ -33,6 +33,8 @@
             android:name=".PlaceDetailActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:parentActivityName=".PlacesListActivity"/>
+
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyDhC1Tha8FKORJfe7--SYluRWe_n1LVMoE"/>
     </application>
 
 </manifest>

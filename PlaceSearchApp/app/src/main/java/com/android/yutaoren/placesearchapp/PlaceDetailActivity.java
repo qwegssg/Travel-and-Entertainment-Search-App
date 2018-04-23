@@ -58,6 +58,7 @@ public class PlaceDetailActivity extends AppCompatActivity
     double placeRating;
     String placeGooglePage;
     String placeWebsite;
+    String place_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +120,8 @@ public class PlaceDetailActivity extends AppCompatActivity
             placeRating = detailResult.getDouble("rating");
             placeGooglePage = detailResult.getString("url");
             placeWebsite = detailResult.getString("website");
+//            in order to retrieve the photos of the place
+            place_id = detailResult.getString("place_id");
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -148,6 +151,10 @@ public class PlaceDetailActivity extends AppCompatActivity
 
     public String getPlaceWebsite() {
         return placeWebsite;
+    }
+
+    public String getPlace_id() {
+        return place_id;
     }
 
     @Override

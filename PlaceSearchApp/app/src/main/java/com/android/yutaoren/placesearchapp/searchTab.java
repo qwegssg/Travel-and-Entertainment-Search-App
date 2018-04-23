@@ -50,8 +50,6 @@ import org.json.JSONObject;
 
 import java.security.Provider;
 
-import static android.content.ContentValues.TAG;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -92,12 +90,6 @@ public class searchTab extends Fragment {
 
     private EditText editText2;
 
-//auto
-    public static final String TAG = "AutoCompleteActivity";
-    private static final int AUTO_COMP_REQ_CODE = 2;
-
-    protected GeoDataClient geoDataClient;
-//auto
 
 
     // TODO: Rename and change types of parameters
@@ -254,7 +246,7 @@ public class searchTab extends Fragment {
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                searchPlaces();
+                gatherFormData();
             }
         });
 
@@ -274,11 +266,6 @@ public class searchTab extends Fragment {
                 otherLocInput.setText("");
             }
         });
-
-
-
-
-
 
         return searchView;
     }
@@ -348,36 +335,54 @@ public class searchTab extends Fragment {
 
     }
 
-
-
-
-//auto
+//    for autocomplete input
     private AdapterView.OnItemClickListener onItemClickListener =
             new AdapterView.OnItemClickListener(){
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                    Toast.makeText(getContext(),
-                            "selected place "
-                                    + ((com.android.yutaoren.placesearchapp.Place)adapterView.
-                                    getItemAtPosition(i)).getPlaceText()
-                            , Toast.LENGTH_SHORT).show();
-                    //do something with the selection
-                    searchScreen();
+                    otherLocInput.setText(
+                            ((com.android.yutaoren.placesearchapp.Place)adapterView.getItemAtPosition(i)).getPlaceText()
+                    );
                 }
             };
 
-    public void searchScreen(){
-        Intent i = new Intent();
-        i.setClass(getContext(), getClass());
-        startActivity(i);
+    //    check if the permission is granted or not
+//    if granted, fetch the user's current location
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+
+        switch (requestCode) {
+            case REQUEST_PERMISSION_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    if (ContextCompat.checkSelfPermission(getActivity(),
+                            Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+
+                        mFusedLocationClient.getLastLocation()
+                                .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
+                                    @Override
+                                    public void onSuccess(Location location) {
+                                        // Got last known location. In some rare situations this can be null.
+                                        if (location != null) {
+
+                                            lat = location.getLatitude();
+                                            lng = location.getLongitude();
+
+                                        }
+                                    }
+                                });
+                    }
+                } else {
+                    Toast.makeText(getActivity(), "Permission Denied!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
-//auto
 
-
-
-
-    private void searchPlaces() {
+    private void gatherFormData() {
         boolean isValid = true;
 //        init request queue
         requestQueue = Volley.newRequestQueue(getActivity());
@@ -503,44 +508,6 @@ public class searchTab extends Fragment {
         editText2.setText(url);
 
     }
-
-
-
-//    check if the permission is granted or not
-//    if granted, fetch the user's current location
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-
-        switch (requestCode) {
-            case REQUEST_PERMISSION_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    if (ContextCompat.checkSelfPermission(getActivity(),
-                            Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-
-                        mFusedLocationClient.getLastLocation()
-                            .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
-                                @Override
-                                public void onSuccess(Location location) {
-                                    // Got last known location. In some rare situations this can be null.
-                                    if (location != null) {
-
-                                        lat = location.getLatitude();
-                                        lng = location.getLongitude();
-
-                                    }
-                                }
-                            });
-                    }
-                } else {
-                    Toast.makeText(getActivity(), "Permission Denied!", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    }
-
 
     private static class ShowProgressDialog extends AsyncTask<Void, Void, Void> {
         private ProgressDialog dialog;
