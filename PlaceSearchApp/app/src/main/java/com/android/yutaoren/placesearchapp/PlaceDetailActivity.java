@@ -205,7 +205,7 @@ public class PlaceDetailActivity extends AppCompatActivity
                     e.printStackTrace();
                 }
                 item.setTitle("like it");
-                
+
 //                remove place to the fav list:
 
 

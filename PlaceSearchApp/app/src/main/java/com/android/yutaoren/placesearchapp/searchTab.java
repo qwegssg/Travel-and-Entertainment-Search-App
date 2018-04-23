@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -38,6 +39,9 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -45,6 +49,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.security.Provider;
+
+import static android.content.ContentValues.TAG;
 
 
 /**
@@ -69,7 +75,8 @@ public class searchTab extends Fragment {
 //    volley request queue
     private RequestQueue requestQueue;
 
-    private EditText keywordInput, otherLocInput, distanceInput;
+    private EditText keywordInput, distanceInput;
+    private AutoCompleteTextView otherLocInput;
     private TextView keywordValidation;
     private TextView otherLocVlidation;
     private Button searchBtn, clearBtn;
@@ -85,6 +92,12 @@ public class searchTab extends Fragment {
 
     private EditText editText2;
 
+//auto
+    public static final String TAG = "AutoCompleteActivity";
+    private static final int AUTO_COMP_REQ_CODE = 2;
+
+    protected GeoDataClient geoDataClient;
+//auto
 
 
     // TODO: Rename and change types of parameters
@@ -262,6 +275,11 @@ public class searchTab extends Fragment {
             }
         });
 
+
+
+
+
+
         return searchView;
     }
 
@@ -290,10 +308,18 @@ public class searchTab extends Fragment {
     }
 
     private void initSearchWidgets(View v) {
+
+        otherLocInput = (AutoCompleteTextView) v.findViewById(R.id.otherLocInput);
+//        auto
+        CustomAutoCompleteAdapter adapter =  new CustomAutoCompleteAdapter(getContext());
+        otherLocInput.setAdapter(adapter);
+        otherLocInput.setOnItemClickListener(onItemClickListener);
+//        auto
+        otherLocInput.setEnabled(false);
+
         keywordInput = (EditText) v.findViewById(R.id.keywordInput);
         distanceInput = (EditText) v.findViewById(R.id.distanceInput);
-        otherLocInput = (EditText) v.findViewById(R.id.otherLocInput);
-        otherLocInput.setEnabled(false);
+
 
         keywordValidation = (TextView) v.findViewById(R.id.keywordValidation);
         otherLocVlidation = (TextView) v.findViewById(R.id.otherLocValidation);
@@ -312,12 +338,44 @@ public class searchTab extends Fragment {
 
 
 
+
+
+
 //    created to test output
         editText2 = (EditText) v.findViewById(R.id.editText2);
 
 
 
     }
+
+
+
+
+//auto
+    private AdapterView.OnItemClickListener onItemClickListener =
+            new AdapterView.OnItemClickListener(){
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                    Toast.makeText(getContext(),
+                            "selected place "
+                                    + ((com.android.yutaoren.placesearchapp.Place)adapterView.
+                                    getItemAtPosition(i)).getPlaceText()
+                            , Toast.LENGTH_SHORT).show();
+                    //do something with the selection
+                    searchScreen();
+                }
+            };
+
+    public void searchScreen(){
+        Intent i = new Intent();
+        i.setClass(getContext(), getClass());
+        startActivity(i);
+    }
+//auto
+
+
+
 
     private void searchPlaces() {
         boolean isValid = true;
@@ -355,7 +413,7 @@ public class searchTab extends Fragment {
                 category = selectedCategory;
             }
 //            4. location input
-            if(otherLocInput.getText().length() == 0) {
+            if(otherLocInput.getText().toString().trim().isEmpty() || !otherLocInput.isEnabled()) {
                 otherLocation = "undefined";
             } else {
                 otherLocation = otherLocInput.getText().toString();
