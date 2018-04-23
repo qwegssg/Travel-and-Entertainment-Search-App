@@ -13,6 +13,9 @@
     <string name="keywordHint">Enter keyword</string>
     <string name="distanceHint">Enter distance (default 10 miles)</string>
     <string name="otherLocHint">Type in the Location</string>
+    <string name="fromLabel">From</string>
+    <string name="fromHint">Type in the Location</string>
+    <string name="modeLabel">Travel mode</string>
     <string-array name="categoryName">
         <item>Default</item>
         <item>Airport</item>
@@ -85,14 +88,18 @@
         <item>&#160;MAP</item>
         <item>&#160;REVIEWS</item>
     </string-array>
-
-
-    <!--<string name="title_activity_place_detail">PlaceDetailActivity</string>-->
-    <!--<string name="tab_text_1">Tab 1</string>-->
-    <!--<string name="tab_text_2">Tab 2</string>-->
-    <!--<string name="tab_text_3">Tab 3</string>-->
-    <!--<string name="action_settings">Settings</string>-->
-    <!--<string name="section_format">Hello World from section: %1$d</string>-->
+    <string-array name="modeName">
+        <item>Driving</item>
+        <item>Bicycling</item>
+        <item>Transit</item>
+        <item>Walking</item>
+    </string-array>
+    <string-array name="modeValue">
+        <item>DRIVING</item>
+        <item>BICYCLING</item>
+        <item>TRANSIT</item>
+        <item>WALKING</item>
+    </string-array>
 
 
 </resources>

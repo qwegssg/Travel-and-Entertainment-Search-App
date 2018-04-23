@@ -88,24 +88,49 @@ public class infoTab extends Fragment {
         TextView placePhoneNumber = (TextView) view.findViewById(R.id.placePhoneNumber);
         TextView placePriceLevel = (TextView) view.findViewById(R.id.placePriceLevel);
         RatingBar ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
+        TextView showNoRating = (TextView) view.findViewById(R.id.showNoRating);
+        TextView ratingTitle = (TextView) view.findViewById(R.id.ratingTitle);
         TextView placeGooglePage = (TextView) view.findViewById(R.id.placeGooglePage);
         TextView placeWebsite = (TextView) view.findViewById(R.id.placeWebsite);
 
-        placeAddress.setText(place_address);
-        placePhoneNumber.setText(place_phone_number);
-        placePriceLevel.setText(place_price_level);
-//        if the rating is not available
+        if(place_address.equals("")) {
+            placeAddress.setText("No address");
+        } else {
+            placeAddress.setText(place_address);
+        }
+        if(place_phone_number.equals("")) {
+            placePhoneNumber.setText("No phone number");
+        } else {
+            placePhoneNumber.setText(place_phone_number);
+        }
+        if(place_price_level.equals("")) {
+            placePriceLevel.setText("No price level");
+        } else {
+            placePriceLevel.setText(place_price_level);
+        }
         if(place_rating == 0.0) {
 //            set the weight of ratingBar to 0 so that it is set hidden
             TableRow.LayoutParams params = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 0);
             ratingBar.setLayoutParams(params);
+//            set the width and weight of the rating title for the consistent layout
+            ratingTitle.setWidth(0);
+            TableRow.LayoutParams params2 = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1);
+            ratingTitle.setLayoutParams(params2);
+            showNoRating.setText("No rating");
         }
         else {
             ratingBar.setRating(place_rating);
         }
-        placeGooglePage.setText(place_google_page);
-        placeWebsite.setText(place_website);
-
+        if(place_google_page.equals("")) {
+            placeGooglePage.setText("No google page");
+        } else {
+            placeGooglePage.setText(place_google_page);
+        }
+        if(place_website.equals("")) {
+            placeWebsite.setText("No website");
+        } else {
+            placeWebsite.setText(place_website);
+        }
 
 
         return view;

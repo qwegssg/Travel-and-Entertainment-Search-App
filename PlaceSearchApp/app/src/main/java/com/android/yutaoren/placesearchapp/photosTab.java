@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.places.GeoDataClient;
@@ -50,6 +51,7 @@ public class photosTab extends Fragment {
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private List<Bitmap> photoList;
+    private TextView showNoPhotos;
 
 
     public photosTab() {
@@ -90,11 +92,12 @@ public class photosTab extends Fragment {
         View view = inflater.inflate(R.layout.fragment_photos_tab, container, false);
 
         recyclerView = (RecyclerView) view.findViewById(R.id.photosRecyclerView);
-        photoList = new ArrayList<>();
+        showNoPhotos = (TextView) view.findViewById(R.id.noPhotos);
+                photoList = new ArrayList<>();
 
 //        get the place id
         PlaceDetailActivity activity = (PlaceDetailActivity) getActivity();
-        getPhotos(view, activity.getPlace_id());
+        getPhotos(activity.getPlace_id());
 
 
 
@@ -126,12 +129,10 @@ public class photosTab extends Fragment {
     }
 
 
-    private void getPhotos(View view, String place_id) {
-        final View theView = view;
+    private void getPhotos(String place_id) {
         final GeoDataClient mGeoDataClient = Places.getGeoDataClient(getActivity(), null);
 
-        final String placeId = place_id;
-        final Task<PlacePhotoMetadataResponse> photoMetadataResponse = mGeoDataClient.getPlacePhotos(placeId);
+        final Task<PlacePhotoMetadataResponse> photoMetadataResponse = mGeoDataClient.getPlacePhotos(place_id);
         photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
             @Override
             public void onComplete(@NonNull Task<PlacePhotoMetadataResponse> task) {
@@ -139,33 +140,34 @@ public class photosTab extends Fragment {
                 PlacePhotoMetadataResponse photos = task.getResult();
                 // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
                 PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
+//                if there is not photo of the place
+                if(photoMetadataBuffer.getCount() == 0) {
+                    showNoPhotos.setText("No photos");
+                } else {
+                    for(int i = 0; i < photoMetadataBuffer.getCount(); i++) {
+                        final int photoNum = photoMetadataBuffer.getCount();
 
-                for(int i = 0; i < photoMetadataBuffer.getCount(); i++) {
-//                    final ImageView photoDetail = (ImageView) theView.findViewById(R.id.placeDetailPhoto);
-                    Toast.makeText(getContext(), photoMetadataBuffer.getCount() + "", Toast.LENGTH_LONG).show();
-                    final int photoNum = photoMetadataBuffer.getCount();
-
-                    PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(i);
-                    Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
-                    photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
-                        @Override
-                        public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
-                            PlacePhotoResponse photo = task.getResult();
-                            Bitmap bitmap = photo.getBitmap();
+                        PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(i);
+                        Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
+                        photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
+                            @Override
+                            public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
+                                PlacePhotoResponse photo = task.getResult();
+                                Bitmap bitmap = photo.getBitmap();
 //                        scale the bitmap to fit the screen size
-                            int photoWidth = 1275;
-                            photoList.add(scaleBitmap(bitmap, photoWidth));
-                            if(photoList.size() == photoNum) {
-                                adapter = new photosAdapter(photoList);
-                                recyclerView.setHasFixedSize(true);
-                                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                                recyclerView.setAdapter(adapter);
+                                int photoWidth = 1275;
+                                photoList.add(scaleBitmap(bitmap, photoWidth));
+                                if(photoList.size() == photoNum) {
+                                    adapter = new photosAdapter(photoList);
+                                    recyclerView.setHasFixedSize(true);
+                                    recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                                    recyclerView.setAdapter(adapter);
+                                }
+
                             }
-
-                        }
-                    });
+                        });
+                    }
                 }
-
             }
         });
     }

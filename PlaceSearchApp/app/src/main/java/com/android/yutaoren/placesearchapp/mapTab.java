@@ -7,6 +7,9 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 
 /**
@@ -28,6 +31,10 @@ public class mapTab extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+
+    private String selectedMode;
+
 
     public mapTab() {
         // Required empty public constructor
@@ -63,8 +70,32 @@ public class mapTab extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        View view = inflater.inflate(R.layout.fragment_map_tab, container, false);
+
+        Spinner modeInput = (Spinner) view.findViewById(R.id.modeInput);
+        ArrayAdapter<CharSequence> modeAdapter;
+        modeAdapter = ArrayAdapter.createFromResource(getContext(), R.array.modeName, android.R.layout.simple_spinner_item);
+        modeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        modeInput.setAdapter(modeAdapter);
+
+        //        handle the spinner selection
+        modeInput.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                selectedMode = getResources().getStringArray(R.array.modeValue)[position];
+
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+
+
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_map_tab, container, false);
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
