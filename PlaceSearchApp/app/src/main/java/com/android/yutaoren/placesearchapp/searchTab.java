@@ -446,10 +446,6 @@ public class searchTab extends Fragment {
 //                    if other location is used
                     if(response.has("lat") && response.getDouble("lat") < 99999.9){
                         String geoLocation = response.getDouble("lat") + "," + response.getDouble("lng");
-
-//                        debug use
-//                        editText2.setText(geoLocation);
-
                         String url = "http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/search?keyword="
                                 + keyword + "&category=" + category + "&distance=" + distance
                                 + "&geoLocation=" + geoLocation + "&otherLocation=undefined";
@@ -461,9 +457,12 @@ public class searchTab extends Fragment {
                                 try {
                                     if(response.getString("status").equals("OK")) {
                                         initPlacesList(response);
-//                                        dismiss the progressing dialog
+                                        showProgressDialog.onPostExecute();
+                                    } else if(response.getString("status").equals("ZERO_RESULTS")) {
+                                        initPlacesList(response);
                                         showProgressDialog.onPostExecute();
                                     }
+
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -478,19 +477,11 @@ public class searchTab extends Fragment {
                     else if(response.getString("status").equals("OK")) {
 
                         initPlacesList(response);
-//                        dismiss the progressing dialog
                         showProgressDialog.onPostExecute();
                     }
                     else if(response.getString("status").equals("ZERO_RESULTS")) {
-                        Toast.makeText(getActivity(), "ZERO_RESULTS", Toast.LENGTH_LONG).show();
-//                        dismiss the progressing dialog
+                        initPlacesList(response);
                         showProgressDialog.onPostExecute();
-
-//                        show no results code here:
-
-
-
-
                     }
 
 

@@ -62,9 +62,18 @@ public class PlacesListActivity extends AppCompatActivity {
 
         try {
             JSONObject jsonObject = new JSONObject(getIntent().getExtras().getString("ShowMeTheList"));
+//            if there is no place result found
+            if(jsonObject.getString("status").equals("ZERO_RESULTS")) {
 
-            initPlacesList(jsonObject);
+                TextView noPlaces = (TextView) findViewById(R.id.noPlaces);
+                noPlaces.setText("No results");
+                previousBtn.setVisibility(View.INVISIBLE);
+                nextBtn.setVisibility(View.INVISIBLE);
 
+            }
+            else {
+                initPlacesList(jsonObject);
+            }
         } catch(JSONException e){
             e.printStackTrace();
         }
