@@ -131,6 +131,16 @@ public class mapTab extends Fragment implements OnMapReadyCallback {
 
                 selectedMode = getResources().getStringArray(R.array.modeValue)[position];
 
+//                when travel mode is changed, redirect the route
+                if(markers.size() == 2) {
+//                    clear the former route
+                    mGoogleMap.clear();
+                    mGoogleMap.addMarker(new MarkerOptions()
+                                            .position(markers.get(0)));
+                    mGoogleMap.addMarker(new MarkerOptions()
+                                            .position(markers.get(1)));
+                    getDirections(getRequestUrl(markers.get(0), markers.get(1), selectedMode));
+                }
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
@@ -175,6 +185,8 @@ public class mapTab extends Fragment implements OnMapReadyCallback {
                                 .zoom(15)
                                 .build();
         mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(camera));
+//        enable the zoom control
+        mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
 
     }
 
@@ -220,15 +232,13 @@ public class mapTab extends Fragment implements OnMapReadyCallback {
                                         mGoogleMap.addMarker(fromMarker);
                                         markers.add(new LatLng(fromLat, fromLng));
 
-                                        String directionUrl = getRequestUrl(markers.get(0), markers.get(1));
-
+//                                        fetch and parse the direction json data to show the direction
+                                        String directionUrl = getRequestUrl(markers.get(0), markers.get(1), selectedMode);
                                         getDirections(directionUrl);
 
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
-
-
                                 }
                             }, new Response.ErrorListener() {
                         @Override
@@ -238,19 +248,16 @@ public class mapTab extends Fragment implements OnMapReadyCallback {
                 }
             };
 
-    private String getRequestUrl(LatLng destPlace, LatLng fromPlace) {
+//    get the request url for fetching direction json data
+    private String getRequestUrl(LatLng destPlace, LatLng fromPlace, String travelMode) {
         String str_dest = "destination=" + destPlace.latitude + "," + destPlace.longitude;
         String str_org = "origin=" + fromPlace.latitude + "," + fromPlace.longitude;
-
-//        need to be implemented
-        String mode = "mode=driving";
-
-
-
+        String mode = "mode=" + travelMode;
         String param = str_org + "&" + str_dest + "&" + mode;
-        String url = "https://maps.googleapis.com/maps/api/directions/json?" + param;
-        return url;
 
+        String url = "https://maps.googleapis.com/maps/api/directions/json?" + param;
+
+        return url;
     }
 
     private void getDirections(String url) {
@@ -339,7 +346,7 @@ public class mapTab extends Fragment implements OnMapReadyCallback {
             if (polylineOptions!=null) {
                 mGoogleMap.addPolyline(polylineOptions);
             } else {
-                Toast.makeText(getContext(), "Direction not found!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Direction not found!", Toast.LENGTH_LONG).show();
             }
         }
     }

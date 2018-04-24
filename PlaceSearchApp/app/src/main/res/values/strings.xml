@@ -96,10 +96,10 @@
         <item>Walking</item>
     </string-array>
     <string-array name="modeValue">
-        <item>DRIVING</item>
-        <item>BICYCLING</item>
-        <item>TRANSIT</item>
-        <item>WALKING</item>
+        <item>driving</item>
+        <item>bicycling</item>
+        <item>transit</item>
+        <item>walking</item>
     </string-array>
 
 
