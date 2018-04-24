@@ -1,11 +1,15 @@
 package com.android.yutaoren.placesearchapp;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +17,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -21,7 +32,17 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -50,6 +71,8 @@ public class mapTab extends Fragment implements OnMapReadyCallback {
     private MapView mMapView;
     private View mView;
     private PlaceDetailActivity activity;
+    private RequestQueue requestQueue;
+    private List<LatLng> markers;
 
 
 
@@ -113,8 +136,8 @@ public class mapTab extends Fragment implements OnMapReadyCallback {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-
-
+        markers = new ArrayList<>();
+        requestQueue = Volley.newRequestQueue(getActivity());
 
         // Inflate the layout for this fragment
         return mView;
@@ -139,10 +162,13 @@ public class mapTab extends Fragment implements OnMapReadyCallback {
 
         mGoogleMap = googleMap;
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        mGoogleMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(activity.getPlaceLat(), activity.getPlaceLng()))
-                            .title(activity.getPlaceName()))
-                            .showInfoWindow();
+
+        MarkerOptions placeMarker = new MarkerOptions()
+                                    .position(new LatLng(activity.getPlaceLat(), activity.getPlaceLng()))
+                                    .title(activity.getPlaceName());
+        mGoogleMap.addMarker(placeMarker).showInfoWindow();
+        markers.add(new LatLng(activity.getPlaceLat(), activity.getPlaceLng()));
+
         CameraPosition camera = CameraPosition
                                 .builder()
                                 .target(new LatLng(activity.getPlaceLat(), activity.getPlaceLng()))
@@ -168,8 +194,88 @@ public class mapTab extends Fragment implements OnMapReadyCallback {
                     fromInput.setText(
                             ((com.android.yutaoren.placesearchapp.Place)adapterView.getItemAtPosition(i)).getPlaceText()
                     );
+
+//                    remove the former marker and renew the marker
+                    if(markers.size() == 2) {
+                        markers.remove(1);
+                        mGoogleMap.clear();
+                        mGoogleMap.addMarker(new MarkerOptions()
+                                    .position(new LatLng(activity.getPlaceLat(), activity.getPlaceLng()))
+                                    .title(activity.getPlaceName()));
+                    }
+
+//                    when user selects a place from the autocomplete suggestions, fetch the geoLocation of the place
+                    String placeUrl = "http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/search?&otherLocation="
+                                        + fromInput.getText();
+                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, placeUrl, null,
+                            new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    try {
+                                        double fromLat = response.getDouble("lat");
+                                        double fromLng = response.getDouble("lng");
+
+                                        MarkerOptions fromMarker = new MarkerOptions()
+                                                                    .position(new LatLng(fromLat, fromLng));
+                                        mGoogleMap.addMarker(fromMarker);
+                                        markers.add(new LatLng(fromLat, fromLng));
+
+                                        String directionUrl = getRequestUrl(markers.get(0), markers.get(1));
+
+                                        getDirections(directionUrl);
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+
+
+                                }
+                            }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {}
+                    });
+                    requestQueue.add(jsonObjectRequest);
                 }
             };
+
+    private String getRequestUrl(LatLng destPlace, LatLng fromPlace) {
+        String str_dest = "destination=" + destPlace.latitude + "," + destPlace.longitude;
+        String str_org = "origin=" + fromPlace.latitude + "," + fromPlace.longitude;
+
+//        need to be implemented
+        String mode = "mode=driving";
+
+
+
+        String param = str_org + "&" + str_dest + "&" + mode;
+        String url = "https://maps.googleapis.com/maps/api/directions/json?" + param;
+        return url;
+
+    }
+
+    private void getDirections(String url) {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    if(response.getString("status").equals("OK")) {
+
+                        TaskParser taskParser = new TaskParser();
+                        taskParser.execute(response.toString());
+
+                        zoomRoute(mGoogleMap, markers);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {}
+        });
+        requestQueue.add(jsonObjectRequest);
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -187,6 +293,74 @@ public class mapTab extends Fragment implements OnMapReadyCallback {
         super.onDetach();
         mListener = null;
     }
+
+
+
+    public class TaskParser extends AsyncTask<String, Void, List<List<HashMap<String, String>>> > {
+
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... strings) {
+            JSONObject jsonObject = null;
+            List<List<HashMap<String, String>>> routes = null;
+            try {
+                jsonObject = new JSONObject(strings[0]);
+//                parse json into directions
+                DirectionsParser directionsParser = new DirectionsParser();
+                routes = directionsParser.parse(jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return routes;
+        }
+
+        //Get list route and display it into the map
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> lists) {
+
+            ArrayList points = null;
+            PolylineOptions polylineOptions = null;
+
+            for (List<HashMap<String, String>> path : lists) {
+                points = new ArrayList();
+                polylineOptions = new PolylineOptions();
+
+                for (HashMap<String, String> point : path) {
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lon = Double.parseDouble(point.get("lon"));
+
+                    points.add(new LatLng(lat,lon));
+                }
+                polylineOptions.addAll(points);
+                polylineOptions.width(25);
+                polylineOptions.color(Color.BLUE);
+                polylineOptions.geodesic(true);
+            }
+
+            if (polylineOptions!=null) {
+                mGoogleMap.addPolyline(polylineOptions);
+            } else {
+                Toast.makeText(getContext(), "Direction not found!", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+//    zoom in and zoom out the map
+    public void zoomRoute(GoogleMap googleMap, List<LatLng> lstLatLngRoute) {
+
+        if (googleMap == null || lstLatLngRoute == null || lstLatLngRoute.isEmpty()) return;
+
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+        for (LatLng latLngPoint : lstLatLngRoute)
+            boundsBuilder.include(latLngPoint);
+
+        int routePadding = 100;
+        LatLngBounds latLngBounds = boundsBuilder.build();
+
+//        set the lat and lng bounds of the camera
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, routePadding));
+    }
+
+
 
 
     /**
