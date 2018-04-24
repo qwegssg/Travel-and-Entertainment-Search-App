@@ -4,9 +4,18 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -28,6 +37,9 @@ public class reviewsTab extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter adapter;
 
     public reviewsTab() {
         // Required empty public constructor
@@ -63,33 +75,44 @@ public class reviewsTab extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_reviews_tab, container, false);
+
+        View view = inflater.inflate(R.layout.fragment_reviews_tab, container, false);
+
+        recyclerView = (RecyclerView) view.findViewById(R.id.reviewsRecyclerView);
+
+        PlaceDetailActivity activity = (PlaceDetailActivity) getActivity();
+        getGoogleReviews(activity.getPlaceGoogleReview());
+
+        return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+    private void getGoogleReviews(JSONArray googleReviews) {
+
+        List<ReviewItem> reviewItems = new ArrayList<>();
+
+        for(int i = 0; i < googleReviews.length(); i++) {
+            try {
+                JSONObject reviewObj = googleReviews.getJSONObject(i);
+                ReviewItem reviewItem = new ReviewItem(
+                                            reviewObj.getString("author_name"),
+                                            reviewObj.getString("text"),
+                                            reviewObj.getString("profile_photo_url")
+                );
+
+                reviewItems.add(reviewItem);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
+        adapter  = new ReviewsAdapter(reviewItems);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
+
+
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
 
     /**
      * This interface must be implemented by activities that contain this

@@ -38,6 +38,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -63,6 +64,7 @@ public class PlaceDetailActivity extends AppCompatActivity
     double placeLat;
     double placeLng;
     String placeName;
+    JSONArray placeGoogleReview;
 
 
     @Override
@@ -113,6 +115,12 @@ public class PlaceDetailActivity extends AppCompatActivity
             placeLat = detailResult.getJSONObject("geometry").getJSONObject("location").getDouble("lat");
             placeLng = detailResult.getJSONObject("geometry").getJSONObject("location").getDouble("lng");
             placeName = detailResult.getString("name");
+
+            if(detailResult.has("reviews")) {
+                placeGoogleReview =   detailResult.getJSONArray("reviews");
+            }
+
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -159,9 +167,10 @@ public class PlaceDetailActivity extends AppCompatActivity
         place_id = "";
         placeLat = 34.0266;
         placeLng = -118.2831;
+        placeGoogleReview = new JSONArray();
     }
 
-
+//    String object is unchangeable when created. No need to worry about changing by other class !
     public String getPlaceAddress() {
         return placeAddress;
     }
@@ -200,6 +209,10 @@ public class PlaceDetailActivity extends AppCompatActivity
 
     public String getPlaceName() {
         return placeName;
+    }
+
+    public JSONArray getPlaceGoogleReview() {
+        return placeGoogleReview;
     }
 
     //    implement the tool bar menu
