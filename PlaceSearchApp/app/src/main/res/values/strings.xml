@@ -1,4 +1,5 @@
 <resources>
+    <string name="google_api_key">AIzaSyDhC1Tha8FKORJfe7--SYluRWe_n1LVMoE</string>
     <string name="app_name">Places Search</string>
     <string name="keywordLabel">Keyword</string>
     <string name="categoryLabel">Category</string>

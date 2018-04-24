@@ -3,13 +3,25 @@ package com.android.yutaoren.placesearchapp;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Spinner;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 
 /**
@@ -20,7 +32,7 @@ import android.widget.Spinner;
  * Use the {@link mapTab#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class mapTab extends Fragment {
+public class mapTab extends Fragment implements OnMapReadyCallback {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -32,8 +44,13 @@ public class mapTab extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-
+    private AutoCompleteTextView fromInput;
     private String selectedMode;
+    private GoogleMap mGoogleMap;
+    private MapView mMapView;
+    private View mView;
+    private PlaceDetailActivity activity;
+
 
 
     public mapTab() {
@@ -71,14 +88,19 @@ public class mapTab extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_map_tab, container, false);
+        mView = inflater.inflate(R.layout.fragment_map_tab, container, false);
+        activity = (PlaceDetailActivity) getActivity();
 
-        Spinner modeInput = (Spinner) view.findViewById(R.id.modeInput);
+        fromInput = mView.findViewById(R.id.fromInput);
+        CustomAutoCompleteAdapter adapter =  new CustomAutoCompleteAdapter(getContext());
+        fromInput.setAdapter(adapter);
+        fromInput.setOnItemClickListener(onItemClickListener);
+
+        Spinner modeInput = (Spinner) mView.findViewById(R.id.modeInput);
         ArrayAdapter<CharSequence> modeAdapter;
         modeAdapter = ArrayAdapter.createFromResource(getContext(), R.array.modeName, android.R.layout.simple_spinner_item);
         modeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         modeInput.setAdapter(modeAdapter);
-
         //        handle the spinner selection
         modeInput.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -95,7 +117,39 @@ public class mapTab extends Fragment {
 
 
         // Inflate the layout for this fragment
-        return view;
+        return mView;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mMapView = (MapView) mView.findViewById(R.id.map);
+        if(mMapView != null) {
+            mMapView.onCreate(null);
+            mMapView.onResume();
+            mMapView.getMapAsync(this);
+        }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+        MapsInitializer.initialize(getContext());
+
+        mGoogleMap = googleMap;
+        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        mGoogleMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(activity.getPlaceLat(), activity.getPlaceLng()))
+                            .title(activity.getPlaceName()))
+                            .showInfoWindow();
+        CameraPosition camera = CameraPosition
+                                .builder()
+                                .target(new LatLng(activity.getPlaceLat(), activity.getPlaceLng()))
+                                .zoom(15)
+                                .build();
+        mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(camera));
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -104,6 +158,18 @@ public class mapTab extends Fragment {
             mListener.onFragmentInteraction(uri);
         }
     }
+
+    //    for autocomplete input
+    private AdapterView.OnItemClickListener onItemClickListener =
+            new AdapterView.OnItemClickListener(){
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                    fromInput.setText(
+                            ((com.android.yutaoren.placesearchapp.Place)adapterView.getItemAtPosition(i)).getPlaceText()
+                    );
+                }
+            };
 
     @Override
     public void onAttach(Context context) {
@@ -121,6 +187,7 @@ public class mapTab extends Fragment {
         super.onDetach();
         mListener = null;
     }
+
 
     /**
      * This interface must be implemented by activities that contain this

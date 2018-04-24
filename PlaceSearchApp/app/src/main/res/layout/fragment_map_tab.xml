@@ -7,7 +7,6 @@
     android:padding="15dp"
     tools:context=".mapTab">
 
-
     <TextView
         android:id="@+id/fromLabel"
         android:layout_width="wrap_content"
@@ -16,7 +15,7 @@
         tools:layout_editor_absoluteX="8dp"
         tools:layout_editor_absoluteY="28dp" />
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/fromInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,4 +38,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:layout_editor_absoluteY="168dp" />
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="466dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp" />
 </LinearLayout>

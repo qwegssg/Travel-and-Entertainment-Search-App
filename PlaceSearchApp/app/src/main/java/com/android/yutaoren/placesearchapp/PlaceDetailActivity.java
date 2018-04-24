@@ -60,6 +60,10 @@ public class PlaceDetailActivity extends AppCompatActivity
     String placeGooglePage;
     String placeWebsite;
     String place_id;
+    double placeLat;
+    double placeLng;
+    String placeName;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +109,10 @@ public class PlaceDetailActivity extends AppCompatActivity
             }
 //            in order to retrieve the photos of the place
             place_id = detailResult.getString("place_id");
-
+//            in order to set the map marker
+            placeLat = detailResult.getJSONObject("geometry").getJSONObject("location").getDouble("lat");
+            placeLng = detailResult.getJSONObject("geometry").getJSONObject("location").getDouble("lng");
+            placeName = detailResult.getString("name");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -150,6 +157,8 @@ public class PlaceDetailActivity extends AppCompatActivity
         placeGooglePage = "";
         placeWebsite = "";
         place_id = "";
+        placeLat = 34.0266;
+        placeLng = -118.2831;
     }
 
 
@@ -181,7 +190,19 @@ public class PlaceDetailActivity extends AppCompatActivity
         return place_id;
     }
 
-//    implement the tool bar menu
+    public double getPlaceLat() {
+        return placeLat;
+    }
+
+    public double getPlaceLng() {
+        return placeLng;
+    }
+
+    public String getPlaceName() {
+        return placeName;
+    }
+
+    //    implement the tool bar menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

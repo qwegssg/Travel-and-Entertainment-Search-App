@@ -2,8 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.yutaoren.placesearchapp">
 
-    <!-- define the ACCESS_FINE_LOCATION permission -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <!-- allow the app to connect the internet -->
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -34,7 +35,16 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:parentActivityName=".PlacesListActivity"/>
 
-        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyDhC1Tha8FKORJfe7--SYluRWe_n1LVMoE"/>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_api_key"/>
+
+
     </application>
+
+    <!--for map rendering-->
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true"/>
 
 </manifest>
