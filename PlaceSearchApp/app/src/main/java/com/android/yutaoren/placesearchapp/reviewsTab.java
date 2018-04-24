@@ -9,12 +9,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -40,6 +44,9 @@ public class reviewsTab extends Fragment {
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
+    private Spinner reviewsSource;
+    private Spinner reviewsOrder;
+
 
     public reviewsTab() {
         // Required empty public constructor
@@ -78,10 +85,19 @@ public class reviewsTab extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_reviews_tab, container, false);
 
+//        show the reviews lst
         recyclerView = (RecyclerView) view.findViewById(R.id.reviewsRecyclerView);
-
         PlaceDetailActivity activity = (PlaceDetailActivity) getActivity();
         getGoogleReviews(activity.getPlaceGoogleReview());
+
+
+//        need to be implemented!
+//        use reviewItem.getReviewName() to get the attribute for sorting
+        reviewsSource = (Spinner) view.findViewById(R.id.reviewsSource);
+        reviewsOrder = (Spinner) view.findViewById(R.id.reviewsOrder);
+
+
+
 
         return view;
     }
@@ -90,22 +106,25 @@ public class reviewsTab extends Fragment {
 
         List<ReviewItem> reviewItems = new ArrayList<>();
 
+//        if there is no google reviews, the length is 0;
         for(int i = 0; i < googleReviews.length(); i++) {
             try {
                 JSONObject reviewObj = googleReviews.getJSONObject(i);
                 ReviewItem reviewItem = new ReviewItem(
                                             reviewObj.getString("author_name"),
                                             reviewObj.getString("text"),
-                                            reviewObj.getString("profile_photo_url")
+                                            reviewObj.getString("profile_photo_url"),
+                                            reviewObj.getString("author_url"),
+                                            reviewObj.getInt("rating"),
+                                            reviewObj.getInt("time")
                 );
-
                 reviewItems.add(reviewItem);
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
-        adapter  = new ReviewsAdapter(reviewItems);
+        adapter  = new ReviewsAdapter(reviewItems, getContext());
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
