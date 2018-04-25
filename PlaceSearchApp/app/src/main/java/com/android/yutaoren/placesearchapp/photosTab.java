@@ -93,7 +93,7 @@ public class photosTab extends Fragment {
 
         recyclerView = (RecyclerView) view.findViewById(R.id.photosRecyclerView);
         showNoPhotos = (TextView) view.findViewById(R.id.noPhotos);
-                photoList = new ArrayList<>();
+        photoList = new ArrayList<>();
 
 //        get the place id
         PlaceDetailActivity activity = (PlaceDetailActivity) getActivity();

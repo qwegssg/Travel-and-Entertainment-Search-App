@@ -32,7 +32,8 @@
     <android.support.v4.view.ViewPager
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/searchPager">
+        android:id="@+id/searchPager"
+        android:padding="15dp">
 
     </android.support.v4.view.ViewPager>
 

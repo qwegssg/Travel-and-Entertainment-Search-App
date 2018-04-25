@@ -9,8 +9,18 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,6 +56,12 @@ public class reviewsTab extends Fragment {
     private RecyclerView.Adapter adapter;
     private Spinner reviewsSource;
     private Spinner reviewsOrder;
+    private TextView noReviews;
+    private boolean isFoundYelpReviews;
+    private  boolean isFoundGoogleReviews;
+
+    List<ReviewItem> reviewItems;
+    List<YelpReviewItem> yelpReviewItems;
 
 
     public reviewsTab() {
@@ -86,15 +102,73 @@ public class reviewsTab extends Fragment {
         View view = inflater.inflate(R.layout.fragment_reviews_tab, container, false);
 
 //        show the reviews lst
+        final PlaceDetailActivity activity = (PlaceDetailActivity) getActivity();
         recyclerView = (RecyclerView) view.findViewById(R.id.reviewsRecyclerView);
-        PlaceDetailActivity activity = (PlaceDetailActivity) getActivity();
-        getGoogleReviews(activity.getPlaceGoogleReview());
-
-
-//        need to be implemented!
-//        use reviewItem.getReviewName() to get the attribute for sorting
+        noReviews = (TextView) view.findViewById(R.id.noReviews);
         reviewsSource = (Spinner) view.findViewById(R.id.reviewsSource);
         reviewsOrder = (Spinner) view.findViewById(R.id.reviewsOrder);
+        reviewItems = new ArrayList<>();
+        yelpReviewItems = new ArrayList<>();
+        isFoundYelpReviews = true;
+        isFoundGoogleReviews = true;
+
+//        show the google reviews and init the Yelp reviews
+        initGoogleReviews(activity.getPlaceGoogleReview());
+
+        String yelpUrl = getYelpReviewsReqUrl(activity.getPlaceAddress(), activity.getPlaceName());
+        sendYelpReqUrl(yelpUrl);
+
+//        handle the reviews sources spinner
+        ArrayAdapter<CharSequence> reviewSourceAdapter;
+        reviewSourceAdapter = ArrayAdapter.createFromResource(getContext(), R.array.reviewSource, android.R.layout.simple_spinner_item);
+        reviewSourceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        reviewsSource.setAdapter(reviewSourceAdapter);
+        reviewsSource.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                if(getResources().getStringArray(R.array.reviewSource)[position].equals("Yelp reviews")) {
+                    if(isFoundYelpReviews) {
+                        noReviews.setVisibility(View.INVISIBLE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                        adapter  = new YelpReviewsAdapter(yelpReviewItems, getContext());
+                        recyclerView.setHasFixedSize(true);
+                        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                        recyclerView.setAdapter(adapter);
+
+                    } else {
+                        noReviews.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.INVISIBLE);
+                    }
+                } else if(getResources().getStringArray(R.array.reviewSource)[position].equals("Google reviews")) {
+                    if(isFoundGoogleReviews) {
+                        noReviews.setVisibility(View.INVISIBLE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                        adapter = new ReviewsAdapter(reviewItems, getContext());
+                        recyclerView.setHasFixedSize(true);
+                        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                        recyclerView.setAdapter(adapter);
+                    } else {
+                        noReviews.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.INVISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+
+//        handle the reviews orders spinner
+
+        //        use reviewItem.getReviewName() to get the attribute for sorting
+
+
+        ArrayAdapter<CharSequence> reviewOrderAdapter;
+        reviewOrderAdapter = ArrayAdapter.createFromResource(getContext(), R.array.reviewOrder, android.R.layout.simple_spinner_item);
+        reviewOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        reviewsOrder.setAdapter(reviewOrderAdapter);
 
 
 
@@ -102,34 +176,139 @@ public class reviewsTab extends Fragment {
         return view;
     }
 
-    private void getGoogleReviews(JSONArray googleReviews) {
-
-        List<ReviewItem> reviewItems = new ArrayList<>();
+    private void initGoogleReviews(JSONArray googleReviews) {
 
 //        if there is no google reviews, the length is 0;
-        for(int i = 0; i < googleReviews.length(); i++) {
+        if(googleReviews.length() == 0) {
+            isFoundGoogleReviews = false;
+        }
+        else {
+            for(int i = 0; i < googleReviews.length(); i++) {
+                try {
+                    JSONObject reviewObj = googleReviews.getJSONObject(i);
+                    ReviewItem reviewItem = new ReviewItem(
+                            reviewObj.getString("author_name"),
+                            reviewObj.getString("text"),
+                            reviewObj.getString("profile_photo_url"),
+                            reviewObj.getString("author_url"),
+                            reviewObj.getInt("rating"),
+                            reviewObj.getInt("time")
+                    );
+                    reviewItems.add(reviewItem);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            adapter  = new ReviewsAdapter(reviewItems, getContext());
+            recyclerView.setHasFixedSize(true);
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            recyclerView.setAdapter(adapter);
+        }
+    }
+
+    private String getYelpReviewsReqUrl(String formatted_address, String name) {
+
+        String state = "";
+        String city = "";
+        String yelpReviewsUrl = "";
+
+        int stateEndIndex = formatted_address.lastIndexOf(",");
+        String addressInUS = formatted_address.substring(0, stateEndIndex);
+        int cityEndIndex = addressInUS.lastIndexOf(",");
+        String stateAndZIP = addressInUS.substring(cityEndIndex + 2);
+        state = stateAndZIP.substring(0, 2);
+
+        String addressInCity = addressInUS.substring(0, cityEndIndex);
+        int cityStartIndex = addressInCity.lastIndexOf(",");
+//        if "," is not found, then the city is the beginning of the address
+        if(cityStartIndex == -1) {
+            city = addressInCity;
+        } else {
+            city = addressInCity.substring(cityStartIndex + 2);
+        }
+        if(formatted_address.length() > 64) {
+            yelpReviewsUrl = "http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/yelpSearch?name="
+                            + name + "&city=" + city + "&state=" + state + "&country=US";
+        }
+//        it is acceptable to assign the address that has less than 64 char to one of the the params
+        else {
+            yelpReviewsUrl = "http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/yelpSearch?name="
+                    + name + "&city=" + city + "&state=" + state + "&country=US&address1=" + formatted_address;
+        }
+        return yelpReviewsUrl;
+    }
+
+    private void sendYelpReqUrl(String url) {
+        final RequestQueue requestQueue = Volley.newRequestQueue(getContext());
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                                                new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    if(response.has("businesses") && response.getJSONArray("businesses").length() > 0) {
+
+                        String yelpReviewsUrl = "http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/yelpReview?id="
+                                                + response.getJSONArray("businesses").getJSONObject(0).getString("id");
+//
+                        JsonObjectRequest yelpRequest = new JsonObjectRequest(Request.Method.GET, yelpReviewsUrl, null,
+                                                        new Response.Listener<JSONObject>() {
+
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    if(response.has("reviews") && response.getJSONArray("reviews").length() > 0) {
+                                        getYelpReviews(response.getJSONArray("reviews"));
+                                    }
+                                    else {
+                                        isFoundYelpReviews = false;
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {}
+                        });
+
+                        requestQueue.add(yelpRequest);
+
+                    } else {
+                        isFoundYelpReviews = false;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {}
+        });
+
+        requestQueue.add(jsonObjectRequest);
+    }
+
+    private void getYelpReviews(JSONArray reviews) {
+
+        for(int i = 0; i < reviews.length(); i++) {
             try {
-                JSONObject reviewObj = googleReviews.getJSONObject(i);
-                ReviewItem reviewItem = new ReviewItem(
-                                            reviewObj.getString("author_name"),
-                                            reviewObj.getString("text"),
-                                            reviewObj.getString("profile_photo_url"),
-                                            reviewObj.getString("author_url"),
-                                            reviewObj.getInt("rating"),
-                                            reviewObj.getInt("time")
+                JSONObject reviewObj = reviews.getJSONObject(i);
+                YelpReviewItem yelpReviewItem = new YelpReviewItem(
+                        reviewObj.getJSONObject("user").getString("name"),
+                        reviewObj.getString("text"),
+                        reviewObj.getJSONObject("user").getString("image_url"),
+                        reviewObj.getString("url"),
+                        reviewObj.getInt("rating"),
+                        reviewObj.getString("time_created")
                 );
-                reviewItems.add(reviewItem);
+                yelpReviewItems.add(yelpReviewItem);
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
-        adapter  = new ReviewsAdapter(reviewItems, getContext());
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
-
-
     }
 
 

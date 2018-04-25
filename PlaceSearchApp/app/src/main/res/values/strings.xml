@@ -101,6 +101,18 @@
         <item>transit</item>
         <item>walking</item>
     </string-array>
+    <string-array name="reviewSource">
+        <item>Google reviews</item>
+        <item>Yelp reviews</item>
+    </string-array>
+    <string-array name="reviewOrder">
+        <item>Default order</item>
+        <item>Highest rating</item>
+        <item>Lowest rating</item>
+        <item>Most recent</item>
+        <item>Least recent</item>
+    </string-array>
+    <string name="noReviews">No reviews</string>
 
 
 </resources>
