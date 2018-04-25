@@ -8,14 +8,16 @@ public class YelpReviewItem {
     private String yelpUrl;
     private int yelpRating;
     private String yelpTime;
+    private int index;
 
-    public YelpReviewItem(String yelpName, String yelpText, String yelpPhotoUrl, String yelpUrl, int yelpRating, String yelpTime) {
+    public YelpReviewItem(String yelpName, String yelpText, String yelpPhotoUrl, String yelpUrl, int yelpRating, String yelpTime, int index) {
         this.yelpName = yelpName;
         this.yelpText = yelpText;
         this.yelpPhotoUrl = yelpPhotoUrl;
         this.yelpUrl = yelpUrl;
         this.yelpRating = yelpRating;
         this.yelpTime = yelpTime;
+        this.index = index;
     }
 
     public String getYelpName() {
@@ -40,5 +42,9 @@ public class YelpReviewItem {
 
     public String getYelpTime() {
         return yelpTime;
+    }
+
+    public int getIndex() {
+        return index;
     }
 }

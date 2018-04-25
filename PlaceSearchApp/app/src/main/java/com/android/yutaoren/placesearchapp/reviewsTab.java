@@ -28,6 +28,8 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -53,12 +55,15 @@ public class reviewsTab extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter adapter;
+    private RecyclerView.Adapter googleRevAdapter;
+    private RecyclerView.Adapter yelpRevAdapter;
     private Spinner reviewsSource;
     private Spinner reviewsOrder;
     private TextView noReviews;
     private boolean isFoundYelpReviews;
-    private  boolean isFoundGoogleReviews;
+    private boolean isFoundGoogleReviews;
+    private boolean isShownYelpReviews;
+    private boolean isShownGoogleReview;
 
     List<ReviewItem> reviewItems;
     List<YelpReviewItem> yelpReviewItems;
@@ -96,7 +101,7 @@ public class reviewsTab extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_reviews_tab, container, false);
@@ -111,6 +116,8 @@ public class reviewsTab extends Fragment {
         yelpReviewItems = new ArrayList<>();
         isFoundYelpReviews = true;
         isFoundGoogleReviews = true;
+        isShownYelpReviews = false;
+        isShownGoogleReview = true;
 
 //        show the google reviews and init the Yelp reviews
         initGoogleReviews(activity.getPlaceGoogleReview());
@@ -128,26 +135,32 @@ public class reviewsTab extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
                 if(getResources().getStringArray(R.array.reviewSource)[position].equals("Yelp reviews")) {
+                    isShownYelpReviews = true;
+                    isShownGoogleReview = false;
+
                     if(isFoundYelpReviews) {
                         noReviews.setVisibility(View.INVISIBLE);
                         recyclerView.setVisibility(View.VISIBLE);
-                        adapter  = new YelpReviewsAdapter(yelpReviewItems, getContext());
+                        googleRevAdapter.notifyDataSetChanged();
                         recyclerView.setHasFixedSize(true);
                         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                        recyclerView.setAdapter(adapter);
+                        recyclerView.setAdapter(yelpRevAdapter);
 
                     } else {
                         noReviews.setVisibility(View.VISIBLE);
                         recyclerView.setVisibility(View.INVISIBLE);
                     }
                 } else if(getResources().getStringArray(R.array.reviewSource)[position].equals("Google reviews")) {
+                    isShownYelpReviews = false;
+                    isShownGoogleReview = true;
+
                     if(isFoundGoogleReviews) {
                         noReviews.setVisibility(View.INVISIBLE);
                         recyclerView.setVisibility(View.VISIBLE);
-                        adapter = new ReviewsAdapter(reviewItems, getContext());
+                        googleRevAdapter.notifyDataSetChanged();
                         recyclerView.setHasFixedSize(true);
                         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                        recyclerView.setAdapter(adapter);
+                        recyclerView.setAdapter(googleRevAdapter);
                     } else {
                         noReviews.setVisibility(View.VISIBLE);
                         recyclerView.setVisibility(View.INVISIBLE);
@@ -161,14 +174,99 @@ public class reviewsTab extends Fragment {
 
 
 //        handle the reviews orders spinner
-
-        //        use reviewItem.getReviewName() to get the attribute for sorting
-
-
         ArrayAdapter<CharSequence> reviewOrderAdapter;
         reviewOrderAdapter = ArrayAdapter.createFromResource(getContext(), R.array.reviewOrder, android.R.layout.simple_spinner_item);
         reviewOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         reviewsOrder.setAdapter(reviewOrderAdapter);
+        reviewsOrder.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                if()
+                if(getResources().getStringArray(R.array.reviewOrder)[position].equals("Highest rating")) {
+                    Collections.sort(reviewItems, new Comparator<ReviewItem>() {
+                        @Override
+                        public int compare(ReviewItem lhs, ReviewItem rhs) {
+                            return Integer.compare(rhs.getReviewRating(),lhs.getReviewRating());
+                        }
+                    });
+                    Collections.sort(yelpReviewItems, new Comparator<YelpReviewItem>() {
+                        @Override
+                        public int compare(YelpReviewItem lhs, YelpReviewItem rhs) {
+                            return Integer.compare(rhs.getYelpRating(),lhs.getYelpRating());
+                        }
+                    });
+                } else if(getResources().getStringArray(R.array.reviewOrder)[position].equals("Lowest rating")) {
+                    Collections.sort(reviewItems, new Comparator<ReviewItem>() {
+                        @Override
+                        public int compare(ReviewItem lhs, ReviewItem rhs) {
+                            return Integer.compare(lhs.getReviewRating(),rhs.getReviewRating());
+                        }
+                    });
+                    Collections.sort(yelpReviewItems, new Comparator<YelpReviewItem>() {
+                        @Override
+                        public int compare(YelpReviewItem lhs, YelpReviewItem rhs) {
+                            return Integer.compare(lhs.getYelpRating(),rhs.getYelpRating());
+                        }
+                    });
+                } else if(getResources().getStringArray(R.array.reviewOrder)[position].equals("Most recent")) {
+                    Collections.sort(reviewItems, new Comparator<ReviewItem>() {
+                        @Override
+                        public int compare(ReviewItem lhs, ReviewItem rhs) {
+                            return Integer.compare(rhs.getReviewTime(),lhs.getReviewTime());
+                        }
+                    });
+                    Collections.sort(yelpReviewItems, new Comparator<YelpReviewItem>() {
+                        @Override
+                        public int compare(YelpReviewItem lhs, YelpReviewItem rhs) {
+                            return rhs.getYelpTime().compareTo(lhs.getYelpTime());
+                        }
+                    });
+                } else if(getResources().getStringArray(R.array.reviewOrder)[position].equals("Least recent")) {
+                    Collections.sort(reviewItems, new Comparator<ReviewItem>() {
+                        @Override
+                        public int compare(ReviewItem lhs, ReviewItem rhs) {
+                            return Integer.compare(lhs.getReviewTime(),rhs.getReviewTime());
+                        }
+                    });
+                    Collections.sort(yelpReviewItems, new Comparator<YelpReviewItem>() {
+                        @Override
+                        public int compare(YelpReviewItem lhs, YelpReviewItem rhs) {
+                            return lhs.getYelpTime().compareTo(rhs.getYelpTime());
+                        }
+                    });
+                } else if(getResources().getStringArray(R.array.reviewOrder)[position].equals("Default order")) {
+                    Collections.sort(reviewItems, new Comparator<ReviewItem>() {
+                        @Override
+                        public int compare(ReviewItem o1, ReviewItem o2) {
+                            return Integer.compare(o1.getIndex(), o2.getIndex());
+                        }
+                    });
+                    Collections.sort(yelpReviewItems, new Comparator<YelpReviewItem>() {
+                        @Override
+                        public int compare(YelpReviewItem o1, YelpReviewItem o2) {
+                            return Integer.compare(o1.getIndex(), o2.getIndex());
+                        }
+                    });
+                }
+
+                if(isShownGoogleReview && isFoundGoogleReviews) {
+                    googleRevAdapter.notifyDataSetChanged();
+                    recyclerView.setHasFixedSize(true);
+                    recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                    recyclerView.setAdapter(googleRevAdapter);
+                } else if(isShownYelpReviews && isFoundYelpReviews) {
+                    yelpRevAdapter.notifyDataSetChanged();
+                    recyclerView.setHasFixedSize(true);
+                    recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                    recyclerView.setAdapter(yelpRevAdapter);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
 
 
@@ -192,7 +290,8 @@ public class reviewsTab extends Fragment {
                             reviewObj.getString("profile_photo_url"),
                             reviewObj.getString("author_url"),
                             reviewObj.getInt("rating"),
-                            reviewObj.getInt("time")
+                            reviewObj.getInt("time"),
+                            i
                     );
                     reviewItems.add(reviewItem);
 
@@ -200,10 +299,10 @@ public class reviewsTab extends Fragment {
                     e.printStackTrace();
                 }
             }
-            adapter  = new ReviewsAdapter(reviewItems, getContext());
+            googleRevAdapter  = new ReviewsAdapter(reviewItems, getContext());
             recyclerView.setHasFixedSize(true);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-            recyclerView.setAdapter(adapter);
+            recyclerView.setAdapter(googleRevAdapter);
         }
     }
 
@@ -301,7 +400,8 @@ public class reviewsTab extends Fragment {
                         reviewObj.getJSONObject("user").getString("image_url"),
                         reviewObj.getString("url"),
                         reviewObj.getInt("rating"),
-                        reviewObj.getString("time_created")
+                        reviewObj.getString("time_created"),
+                        i
                 );
                 yelpReviewItems.add(yelpReviewItem);
 
@@ -309,8 +409,8 @@ public class reviewsTab extends Fragment {
                 e.printStackTrace();
             }
         }
+        yelpRevAdapter  = new YelpReviewsAdapter(yelpReviewItems, getContext());
     }
-
 
     /**
      * This interface must be implemented by activities that contain this
