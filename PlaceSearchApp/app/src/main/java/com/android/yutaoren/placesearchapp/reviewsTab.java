@@ -141,7 +141,7 @@ public class reviewsTab extends Fragment {
                     if(isFoundYelpReviews) {
                         noReviews.setVisibility(View.INVISIBLE);
                         recyclerView.setVisibility(View.VISIBLE);
-                        googleRevAdapter.notifyDataSetChanged();
+                        yelpRevAdapter.notifyDataSetChanged();
                         recyclerView.setHasFixedSize(true);
                         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
                         recyclerView.setAdapter(yelpRevAdapter);

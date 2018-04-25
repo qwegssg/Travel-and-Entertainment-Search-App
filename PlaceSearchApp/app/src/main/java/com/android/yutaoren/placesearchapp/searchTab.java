@@ -87,11 +87,6 @@ public class searchTab extends Fragment {
     private double lat, lng;
 
 
-
-    private EditText editText2;
-
-
-
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -150,12 +145,12 @@ public class searchTab extends Fragment {
                             if (location != null) {
                                 lat = location.getLatitude();
                                 lng = location.getLongitude();
-                                Toast.makeText(getActivity(), lat + " " + lng, Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(getActivity(), lat + " " + lng, Toast.LENGTH_SHORT).show();
                             } else {
-                                Toast.makeText(getActivity(), "cannot get current loc", Toast.LENGTH_SHORT).show();
 //                                hardcode lat & lng
                                 lat = 34.0266;
-                                lng = -118.2832;
+                                lng = -118.2831;
+//                                Toast.makeText(getActivity(), "cannot get current loc", Toast.LENGTH_SHORT).show();
                             }
                         }
                     })
@@ -323,16 +318,6 @@ public class searchTab extends Fragment {
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categoryInput.setAdapter(categoryAdapter);
 
-
-
-
-
-
-//    created to test output
-        editText2 = (EditText) v.findViewById(R.id.editText2);
-
-
-
     }
 
 //    for autocomplete input
@@ -495,9 +480,6 @@ public class searchTab extends Fragment {
             public void onErrorResponse(VolleyError error) {}
         });
         requestQueue.add(jsonObjectRequest);
-
-        editText2.setText(url);
-
     }
 
     private static class ShowProgressDialog extends AsyncTask<Void, Void, Void> {
