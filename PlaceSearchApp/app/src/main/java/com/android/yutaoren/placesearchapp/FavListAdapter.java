@@ -22,15 +22,17 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.ViewHolder> {
+public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ViewHolder> {
 
     private List<PlaceItem> placeItems;
     private Context context;
     private List<PlaceItem> favPlaceItems;
+    private favoritesTab favoritesTab;
 
-    public PlacesListAdapter(List<PlaceItem> placeItems, Context context) {
+    public FavListAdapter(List<PlaceItem> placeItems, Context context, favoritesTab favoritesTab) {
         this.placeItems = placeItems;
         this.context = context;
+        this.favoritesTab = favoritesTab;
     }
 
     @NonNull
@@ -42,7 +44,7 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
         return new ViewHolder(view);
     }
 
-//    bind the view with data
+    //    bind the view with data
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
 
@@ -61,7 +63,7 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
         holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((PlacesListActivity)context).onClickCalled(placeItem.getPlace_id(), placeItem.getPlaceTitle());
+                favoritesTab.generateUrl(placeItem.getPlace_id(), placeItem.getPlaceTitle());
             }
         });
 
@@ -70,7 +72,7 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
 
 //        fetch the fav places data
         final SharedPreferences prefs = context.getSharedPreferences(
-                                        "com.android.yutaoren.placesearchapp", Context.MODE_PRIVATE);
+                "com.android.yutaoren.placesearchapp", Context.MODE_PRIVATE);
         final String key = "com.android.yutaoren.placesearchapp.key";
 
 //        prefs.edit().clear().apply();

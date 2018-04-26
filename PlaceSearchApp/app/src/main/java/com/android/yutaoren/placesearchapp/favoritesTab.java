@@ -1,12 +1,35 @@
 package com.android.yutaoren.placesearchapp;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -63,8 +86,107 @@ public class favoritesTab extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_favorites_tab, container, false);
+
+        View view = inflater.inflate(R.layout.fragment_favorites_tab, container, false);
+
+        List<PlaceItem> favPlaceItems = new ArrayList<>();
+        String key = "com.android.yutaoren.placesearchapp.key";
+        SharedPreferences prefs = getContext().getSharedPreferences(
+                "com.android.yutaoren.placesearchapp", Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.favRecyclerView);
+        TextView noFavs = (TextView) view.findViewById(R.id.noFavorites);
+
+
+
+        if(prefs.getAll().size() == 0) {
+            noFavs.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.INVISIBLE);
+        } else {
+            noFavs.setVisibility(View.INVISIBLE);
+            recyclerView.setVisibility(View.VISIBLE);
+
+            String json = prefs.getString(key, "yutaoren");
+            favPlaceItems = gson.fromJson(json, new TypeToken<List<PlaceItem>>(){}.getType());
+
+            RecyclerView.Adapter adapter = new FavListAdapter(favPlaceItems, getContext(), favoritesTab.this);
+//        set the fixed view size
+            recyclerView.setHasFixedSize(true);
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            recyclerView.setAdapter(adapter);
+        }
+
+        return view;
+    }
+
+    //    fetch the place details info
+    public void generateUrl(String place_id, String placeTitle) {
+        String theUrl = "http://nodejsyutaoren.us-east-2.elasticbeanstalk.com/detail?placeid=" + place_id;
+        sendJSONRequestforDetail(theUrl);
+    }
+
+    private void sendJSONRequestforDetail(String theUrl) {
+//        show the progressing dialog
+        final ShowProgressDialog showProgressDialog = new ShowProgressDialog(getActivity());
+        showProgressDialog.onPreExecute();
+
+        RequestQueue requestQueue = Volley.newRequestQueue(getContext());
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, theUrl, null,
+                new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if(response.getString("status").equals("OK")) {
+                                initPlacesDetail(response);
+                            }
+//                    dismiss the progressing dialog
+                            showProgressDialog.onPostExecute();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {}
+        });
+        requestQueue.add(jsonObjectRequest);
+    }
+
+    private void initPlacesDetail(JSONObject response) {
+        Intent intent = new Intent(getContext(), PlaceDetailActivity.class);
+
+        String resString = response.toString();
+        intent.putExtra("ShowMeTheDetail", resString);
+        startActivity(intent);
+    }
+
+    private static class ShowProgressDialog extends AsyncTask<Void, Void, Void> {
+        private ProgressDialog dialog;
+
+        private ShowProgressDialog(Activity activity) {
+            dialog = new ProgressDialog(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.setMessage("Fetching next page");
+            dialog.show();
+        }
+
+        protected Void doInBackground(Void... args) {
+            // do background work here
+            return null;
+        }
+
+        protected void onPostExecute() {
+            // do UI work here
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event

@@ -113,6 +113,7 @@
         <item>Least recent</item>
     </string-array>
     <string name="noReviews">No reviews</string>
+    <string name="noFavorites">No favorites</string>
 
 
 </resources>

@@ -228,7 +228,6 @@ public class PlacesListActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-
     private static class ShowProgressDialog extends AsyncTask<Void, Void, Void> {
         private ProgressDialog dialog;
 
