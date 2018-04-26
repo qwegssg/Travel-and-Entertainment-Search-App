@@ -37,9 +37,6 @@ public class CustomAutoCompleteAdapter extends ArrayAdapter {
     private CustomAutoCompleteAdapter.CustomAutoCompleteFilter listFilter =
             new CustomAutoCompleteAdapter.CustomAutoCompleteFilter();
 
-//    private TextView country;
-//    private Spinner placeType;
-//    private int[] placeTypeValues;
 
     public CustomAutoCompleteAdapter(Context context) {
         super(context, android.R.layout.simple_dropdown_item_1line,
@@ -48,16 +45,6 @@ public class CustomAutoCompleteAdapter extends ArrayAdapter {
 
         //get GeoDataClient
         geoDataClient = Places.getGeoDataClient(mContext, null);
-
-        //get country textview, placetype spinner to get
-        // current values to perform research
-
-//        country = ((Activity) context).findViewById(R.id.country);
-//        placeType = ((Activity) context).findViewById(R.id.place_type);
-
-        //spinner value map from array resources
-//        placeTypeValues = ((Activity) context).getResources().
-//                getIntArray(R.array.placeTypesValue);
 
     }
 
@@ -178,10 +165,6 @@ public class CustomAutoCompleteAdapter extends ArrayAdapter {
             AutocompleteFilter.Builder filterBuilder = new AutocompleteFilter.Builder();
             filterBuilder.setCountry("US");
             filterBuilder.setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS);
-
-
-
-
 
             Task<AutocompletePredictionBufferResponse> results =
                     geoDataClient.getAutocompletePredictions(query, null,

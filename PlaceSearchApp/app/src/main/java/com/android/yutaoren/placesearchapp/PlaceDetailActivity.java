@@ -2,7 +2,9 @@ package com.android.yutaoren.placesearchapp;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
@@ -26,6 +28,9 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,7 +59,11 @@ public class PlaceDetailActivity extends AppCompatActivity
     double placeLng;
     String placeName;
     JSONArray placeGoogleReview;
-
+    List<PlaceItem> favPlaceItems;
+    SharedPreferences prefs;
+    String key;
+    Gson gson;
+    PlaceItem placeItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,8 +117,17 @@ public class PlaceDetailActivity extends AppCompatActivity
             if(detailResult.has("reviews")) {
                 placeGoogleReview =   detailResult.getJSONArray("reviews");
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-
+//        create the placeItem object for fav adding and removing
+        try {
+            placeItem = new PlaceItem(
+                    detailResult.getString("name"),
+                    detailResult.getString("vicinity"),
+                    detailResult.getString("icon"),
+                    detailResult.getString("place_id"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -157,6 +175,10 @@ public class PlaceDetailActivity extends AppCompatActivity
         placeLat = 34.0266;
         placeLng = -118.2831;
         placeGoogleReview = new JSONArray();
+        favPlaceItems = new ArrayList<>();
+        prefs = this.getSharedPreferences("com.android.yutaoren.placesearchapp", Context.MODE_PRIVATE);
+        key = "com.android.yutaoren.placesearchapp.key";
+        gson = new Gson();
     }
 
 //    String object is unchangeable when created. No need to worry about changing by other class !
@@ -209,6 +231,19 @@ public class PlaceDetailActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_place_detail, menu);
+
+//        init the fav status of the place
+        if(!prefs.getAll().isEmpty()) {
+            String json = prefs.getString(key, "yutaoren");
+            favPlaceItems = gson.fromJson(json, new TypeToken<List<PlaceItem>>(){}.getType());
+            for(int i = 0; i < favPlaceItems.size(); i++) {
+                if(favPlaceItems.get(i).getPlace_id().equals(placeItem.getPlace_id())) {
+                    menu.findItem(R.id.favoriteBtn).setIcon(R.drawable.heart_fill_white);
+                    menu.findItem(R.id.favoriteBtn).setTitle("unlike it");
+                }
+            }
+        }
+
         return true;
     }
     @Override
@@ -242,6 +277,9 @@ public class PlaceDetailActivity extends AppCompatActivity
         }
 
         if (id == R.id.favoriteBtn) {
+
+            String json = "";
+
             if(item.getTitle().equals("like it")) {
                 item.setIcon(R.drawable.heart_fill_white);
                 try {
@@ -252,10 +290,14 @@ public class PlaceDetailActivity extends AppCompatActivity
                 }
                 item.setTitle("unlike it");
 
-//                add place to the fav list:
-
-
-
+//                add place to the fav list
+                if(!prefs.getAll().isEmpty()) {
+                    json = prefs.getString(key, "yutaoren");
+                    favPlaceItems = gson.fromJson(json, new TypeToken<List<PlaceItem>>(){}.getType());
+                }
+                favPlaceItems.add(placeItem);
+                json = gson.toJson(favPlaceItems);
+                prefs.edit().putString(key, json).apply();
 
             } else {
                 item.setIcon(R.drawable.heart_outline_white);
@@ -267,15 +309,27 @@ public class PlaceDetailActivity extends AppCompatActivity
                 }
                 item.setTitle("like it");
 
-//                remove place to the fav list:
-
-
-
+//                remove place to the fav list
+                json = prefs.getString(key, "yutaoren");
+                favPlaceItems = gson.fromJson(json, new TypeToken<List<PlaceItem>>(){}.getType());
+                for(int i = 0; i < favPlaceItems.size(); i++) {
+                    if(favPlaceItems.get(i).getPlace_id().equals(placeItem.getPlace_id())) {
+                        favPlaceItems.remove(i);
+                        json = gson.toJson(favPlaceItems);
+                        prefs.edit().putString(key, json).apply();
+                    }
+                }
 
             }
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void startActivityAfterCleanup(Class<?> cls) {
+        Intent intent = new Intent(getApplicationContext(), cls);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
 
@@ -316,10 +370,6 @@ public class PlaceDetailActivity extends AppCompatActivity
         }
     }
 
-
-
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
+    public void onFragmentInteraction(Uri uri) {}
 }

@@ -345,7 +345,7 @@ public class searchTab extends Fragment {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     if (ContextCompat.checkSelfPermission(getActivity(),
-                            Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+                            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
                         mFusedLocationClient.getLastLocation()
                                 .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
@@ -353,10 +353,8 @@ public class searchTab extends Fragment {
                                     public void onSuccess(Location location) {
                                         // Got last known location. In some rare situations this can be null.
                                         if (location != null) {
-
                                             lat = location.getLatitude();
                                             lng = location.getLongitude();
-
                                         }
                                     }
                                 });
@@ -385,6 +383,15 @@ public class searchTab extends Fragment {
             if(otherLocInput.getText().toString().trim().isEmpty()) {
                 otherLocVlidation.setVisibility(View.VISIBLE);
                 Toast.makeText(getActivity(), R.string.validationToast, Toast.LENGTH_LONG).show();
+                isValid = false;
+            }
+        }
+
+//        handle the case when accessing permission of current loc is not granted from user
+        if(currentLocBtn.isChecked()) {
+            if (ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(getActivity(), "Cannot get location", Toast.LENGTH_LONG).show();
                 isValid = false;
             }
         }
@@ -469,8 +476,6 @@ public class searchTab extends Fragment {
                         initPlacesList(response);
                         showProgressDialog.onPostExecute();
                     }
-
-
 
                 } catch (JSONException e) {
                     e.printStackTrace();

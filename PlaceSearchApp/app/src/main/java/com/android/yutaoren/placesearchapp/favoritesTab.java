@@ -14,7 +14,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -51,6 +53,16 @@ public class favoritesTab extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    public RecyclerView.Adapter adapter;
+    public RecyclerView recyclerView;
+    private TextView noFavs;
+    private List<PlaceItem> favPlaceItems;
+
+    private String key;
+    private SharedPreferences prefs;
+    private Gson gson;
+
 
     public favoritesTab() {
         // Required empty public constructor
@@ -89,16 +101,14 @@ public class favoritesTab extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_favorites_tab, container, false);
 
-        List<PlaceItem> favPlaceItems = new ArrayList<>();
-        String key = "com.android.yutaoren.placesearchapp.key";
-        SharedPreferences prefs = getContext().getSharedPreferences(
+        favPlaceItems = new ArrayList<>();
+        key = "com.android.yutaoren.placesearchapp.key";
+        prefs = getContext().getSharedPreferences(
                 "com.android.yutaoren.placesearchapp", Context.MODE_PRIVATE);
-        Gson gson = new Gson();
+        gson = new Gson();
 
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.favRecyclerView);
-        TextView noFavs = (TextView) view.findViewById(R.id.noFavorites);
-
-
+        recyclerView = (RecyclerView) view.findViewById(R.id.favRecyclerView);
+        noFavs = (TextView) view.findViewById(R.id.noFavorites);
 
         if(prefs.getAll().size() == 0) {
             noFavs.setVisibility(View.VISIBLE);
@@ -110,11 +120,16 @@ public class favoritesTab extends Fragment {
             String json = prefs.getString(key, "yutaoren");
             favPlaceItems = gson.fromJson(json, new TypeToken<List<PlaceItem>>(){}.getType());
 
-            RecyclerView.Adapter adapter = new FavListAdapter(favPlaceItems, getContext(), favoritesTab.this);
-//        set the fixed view size
-            recyclerView.setHasFixedSize(true);
-            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-            recyclerView.setAdapter(adapter);
+            if(favPlaceItems.size() == 0) {
+                noFavs.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.INVISIBLE);
+            } else {
+                adapter = new FavListAdapter(favPlaceItems, getContext(), favoritesTab.this);
+//                set the fixed view size
+                recyclerView.setHasFixedSize(true);
+                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                recyclerView.setAdapter(adapter);
+            }
         }
 
         return view;
@@ -211,6 +226,33 @@ public class favoritesTab extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if(prefs.getAll().size() == 0) {
+            noFavs.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.INVISIBLE);
+        } else {
+            noFavs.setVisibility(View.INVISIBLE);
+            recyclerView.setVisibility(View.VISIBLE);
+
+            String json = prefs.getString(key, "yutaoren");
+            favPlaceItems = gson.fromJson(json, new TypeToken<List<PlaceItem>>(){}.getType());
+
+            if(favPlaceItems.size() == 0) {
+                noFavs.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.INVISIBLE);
+            } else {
+                adapter = new FavListAdapter(favPlaceItems, getContext(), favoritesTab.this);
+//                set the fixed view size
+                recyclerView.setHasFixedSize(true);
+                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                recyclerView.setAdapter(adapter);
+            }
+        }
     }
 
     /**

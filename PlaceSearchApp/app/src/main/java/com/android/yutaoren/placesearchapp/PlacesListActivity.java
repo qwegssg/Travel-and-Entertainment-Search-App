@@ -25,6 +25,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +50,8 @@ public class PlacesListActivity extends AppCompatActivity {
     private String next_page_token;
 //    a list storing every page's list
     private List<List<PlaceItem>> placeItemsStorage;
+    private List<PlaceItem> placeItems;
+    private PlaceItem placeItem;
 
 
     @Override
@@ -117,7 +121,6 @@ public class PlacesListActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 
     private void initPlacesWidgets() {
@@ -186,7 +189,7 @@ public class PlacesListActivity extends AppCompatActivity {
 
     private void initPlacesList(JSONObject jsonObject) {
 
-        List<PlaceItem> placeItems = new ArrayList<>();
+        placeItems = new ArrayList<>();
 
         currentPage++;
         pageBtnCheck();
@@ -254,7 +257,6 @@ public class PlacesListActivity extends AppCompatActivity {
         }
     }
 
-
 //    android.R.id.home handling code
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
@@ -272,7 +274,6 @@ public class PlacesListActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
-
 
 //    fetch the place details info
     public void onClickCalled(String place_id, String placeTitle) {
@@ -310,10 +311,30 @@ public class PlacesListActivity extends AppCompatActivity {
     }
 
     private void initPlacesDetail(JSONObject response) {
+
+        try {
+            JSONObject placeItemObj = response.getJSONObject("result");
+            placeItem = new PlaceItem(
+                    placeItemObj.getString("name"),
+                    placeItemObj.getString("vicinity"),
+                    placeItemObj.getString("icon"),
+                    placeItemObj.getString("place_id"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         Intent intent = new Intent(this, PlaceDetailActivity.class);
 
         String resString = response.toString();
         intent.putExtra("ShowMeTheDetail", resString);
         startActivity(intent);
     }
+
+//    handle the case when return from place detail activity
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adapter.notifyDataSetChanged();
+    }
+
 }

@@ -56,8 +56,6 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
                 .load(placeItem.getImageUrl())
                 .into(holder.imageViewCategory);
 
-
-//        need to be implemented!
         holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -65,33 +63,14 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
             }
         });
 
-
-
-
 //        fetch the fav places data
         final SharedPreferences prefs = context.getSharedPreferences(
                                         "com.android.yutaoren.placesearchapp", Context.MODE_PRIVATE);
         final String key = "com.android.yutaoren.placesearchapp.key";
 
 //        prefs.edit().clear().apply();
-//        Toast.makeText(context, prefs.getAll().size() + "", Toast.LENGTH_LONG).show();
 
 //        init the fav status of the place list
-
-//        if(!prefs.getAll().isEmpty()) {
-//            for(int i = 0; i < prefs.getAll().size(); i++) {
-//                for(int j = 0; j < placeItems.size(); j++) {
-//                    if(prefs.contains(key + placeItems.get(j).getPlace_id())) {
-//                        String json = prefs.getString(key + placeItems.get(j).getPlace_id(), "yutaoren");
-//                        PlaceItem place = gson.fromJson(json, PlaceItem.class);
-//                        if (place.getPlace_id().equals(placeItem.getPlace_id())) {
-//                            holder.imageButtonFav.setBackgroundResource(R.drawable.heart_fill_red);
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
         favPlaceItems = new ArrayList<>();
         if(!prefs.getAll().isEmpty()) {
             String json = prefs.getString(key, "yutaoren");
@@ -99,12 +78,13 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
             for(int i = 0; i < favPlaceItems.size(); i++) {
                 if(favPlaceItems.get(i).getPlace_id().equals(placeItem.getPlace_id())) {
                     holder.imageButtonFav.setBackgroundResource(R.drawable.heart_fill_red);
+//                    break is very important
+                    break;
+                } else {
+                    holder.imageButtonFav.setBackgroundResource(R.drawable.heart_outline_black);
                 }
             }
         }
-
-
-
 
         holder.imageButtonFav.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,18 +95,6 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
 //                if the place is already added to the fav list
                 if(holder.imageButtonFav.getBackground().getConstantState().equals(
                         context.getDrawable(R.drawable.heart_fill_red).getConstantState())) {
-
-//                    for(int i = 0; i < prefs.getAll().size(); i++) {
-//                        for(int j = 0; j < placeItems.size(); j++) {
-//                            if(prefs.contains(key + placeItems.get(j).getPlace_id())) {
-//                                String json = prefs.getString(key + placeItems.get(j).getPlace_id(), "yutaoren");
-//                                PlaceItem place = gson.fromJson(json, PlaceItem.class);
-//                                if (place.getPlace_id().equals(placeItem.getPlace_id())) {
-//                                    prefs.edit().remove(key + placeItems.get(j).getPlace_id()).apply();
-//                                }
-//                            }
-//                        }
-//                    }
 
                     favPlaceItemsJson = prefs.getString(key, "yutaoren");
                     favPlaceItems = gson.fromJson(favPlaceItemsJson, new TypeToken<List<PlaceItem>>(){}.getType());
@@ -146,10 +114,6 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
                 else if(holder.imageButtonFav.getBackground().getConstantState().equals(
                         context.getDrawable(R.drawable.heart_outline_black).getConstantState())) {
 
-//                    String placeItemFavKey = "com.android.yutaoren.placesearchapp.key" + placeItem.getPlace_id();
-//                    String placeItemFavJson = gson.toJson(placeItem);
-//                    prefs.edit().putString(placeItemFavKey, placeItemFavJson).apply();
-
                     favPlaceItems.add(placeItem);
                     favPlaceItemsJson = gson.toJson(favPlaceItems);
                     prefs.edit().putString(key, favPlaceItemsJson).apply();
@@ -158,8 +122,6 @@ public class PlacesListAdapter extends RecyclerView.Adapter<PlacesListAdapter.Vi
                     holder.imageButtonFav.setBackgroundResource(R.drawable.heart_fill_red);
 
                 }
-
-
             }
         });
     }
