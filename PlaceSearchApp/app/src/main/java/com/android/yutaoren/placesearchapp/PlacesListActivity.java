@@ -134,6 +134,7 @@ public class PlacesListActivity extends AppCompatActivity {
         currentPage = 0;
         totalPage = 0;
         placeItemsStorage = new ArrayList<>();
+         placeItems = new ArrayList<>();
     }
 
     private void pageBtnCheck() {
@@ -188,8 +189,6 @@ public class PlacesListActivity extends AppCompatActivity {
 
 
     private void initPlacesList(JSONObject jsonObject) {
-
-        placeItems = new ArrayList<>();
 
         currentPage++;
         pageBtnCheck();
@@ -334,7 +333,10 @@ public class PlacesListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        adapter.notifyDataSetChanged();
+        if(placeItems.size() != 0) {
+            adapter.notifyDataSetChanged();
+        }
+
     }
 
 }
